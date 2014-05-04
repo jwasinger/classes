@@ -1,0 +1,24 @@
+$dbcnx = @mysql_connect("mysql.cs.orst.edu", "cs275_wasingej", "12qwaszx");
+
+if(!$dbcnx)
+{
+	echo 'Connection failure!';
+	exit();
+}
+
+//Select database and send the query
+
+$db = mysql_select_db("wasingej-db", $dbcnx);
+
+if(!$db)
+{
+	echo 'Database failure!';
+}
+
+$query = 'SELECT * FROM Table';
+$result = mysql_query($query);
+
+if(!$result)
+{
+	die('Fatal error(s):'.mysql_error());
+}

@@ -1,0 +1,18 @@
+<table>
+	<caption>
+		<dfn title = "Information"></dfn>
+	</caption>
+	<tr>
+		...data
+	</tr>
+
+	<php>
+		while($row = mysql_fetch_array($result))
+		{
+			echo "<tr>";
+			echo "<td>".$row["name"]."</td>";
+			echo "<td>".$row["affil"]."</td>";
+			echo "<td>".$row["hp"]."</td>";
+			echo "</tr>";
+		}
+	</php>
