@@ -1,7 +1,5 @@
 <?php
 	
-echo 'sup!';
-
 $db_connection = @mysql_connect("mysql.cs.orst.edu",  "cs275_wasingej", "7406");
 if(!$db_connection)
 {
@@ -23,9 +21,8 @@ if(!$result)
 	die('Fatal error(s): '.mysql_error());
 }
 
-include "./header.html";
-include "./body.html";
+include "./html/header.html";
+include "./html/body.html";
 
-echo "hey";
 ?>
 
