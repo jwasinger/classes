@@ -50,3 +50,17 @@ SET E.salary = E.salary * 1.10
 
 DELETE FROM Dept
 WHERE dname = 'Toy'
+
+#------------- Project SQL ----------------------
+
+CREATE TABLE TourCenter (
+							Name		CHAR(20),
+							Price		REAL,
+							open_time	TIME, 
+							close_time 	TIME,
+							street_addr CHAR(40),
+						);
+						
+CREATE TABLE Restaurant (
+						
+						);
