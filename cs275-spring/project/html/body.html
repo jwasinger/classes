@@ -1,0 +1,19 @@
+<html lang="en">
+	<table name="Data">
+		<tr>
+			<td>Name</td>
+			<td>Price</td>
+
+			
+		</tr>
+		<?php
+			while( $row = mysql_fetch_array($result) )
+			{
+				echo "<tr>";
+				echo "<td>".$row["name"]."</td>";
+				echo "<td>".$row["price"]."</td>";
+				echo "</tr>";
+			}
+		?>
+	</table>
+</html>
