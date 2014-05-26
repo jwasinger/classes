@@ -1,5 +1,8 @@
 <html lan="en">
 	<head>
+	</head>
+
+	<body>
 		<form method="POST" action="../php/login.php">
 			<div>
 				Username: 
@@ -11,5 +14,11 @@
 				<input type="submit" value="Login" name="login"/>
 			</div>
 		</form>
-	</head>
+		<?php 
+			if($user_login_fail)
+			{
+				echo('<div> Login credentials could not be verified </div>');
+			}
+		?>
+	</body>
 </html>

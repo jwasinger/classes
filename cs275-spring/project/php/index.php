@@ -1,11 +1,26 @@
 <?php
 
-$db_connection = mysql_connect("mysql.cs.orst.edu", "cs275_wasingej", "7406");
-if(!$db_connection)
+$db_initiallized = false;
+$db_connection = NULL;
+
+function db_init()
 {
-	echo 'Connection failure!';
-	exit();
+	global $db_initiallized, $db_connection;
+
+	if(!db_initiallized)
+	{
+		$db_connection = mysql_connect("mysql.cs.orst.edu", "cs275_wasingej", "7406");
+		if(!$db_connection)
+		{
+			echo 'Connection failure!';
+			exit();
+		}
+
+		$db_initiallized = true;
+	}
 }
+
+db_init();
 
 $db = mysql_select_db("cs275_wasingej", $db_connection);
 if(!$db)
@@ -21,9 +36,7 @@ if(!$result)
 	die('Fatal error(s): '.mysql_error());
 }
 
-echo "sup";
-include "./html/header.html";
-include "./html/body.html";
+include "../html/index.html";
 
 ?>
 
