@@ -1,0 +1,37 @@
+<html lan="en">
+	<head>
+	</head>
+
+	<body>
+		<form method="POST" action="../php/new_user.php">
+			Desired Username:
+			<input type="text" name="username" size=20/>
+			Password:
+			<input type="password" name="password" size=20/>
+			Re-enter Password:
+			<input type="password" name="password2" size=20/>
+
+			<input type="submit" name="register" value="Register" />
+
+			<script>
+				void on_create_account_click()
+				{
+					if($("input[name=password]").val() == $("input[name=password2]").val())
+					{
+						$(location).attr('href', '../php/new_user.php');
+						return;
+					}
+					else
+					{
+						alert("Passwords do not match!");
+						$("input[name=password]").val(null);
+						$("input[name=password2]").val(null);
+						return;
+					}
+				}
+			</script>
+			
+			<button onclick="on_create_account_click()"> Create Account </button>
+		</form>
+	</body>
+</html>

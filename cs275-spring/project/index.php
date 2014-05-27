@@ -7,7 +7,7 @@ function db_init()
 {
 	global $db_initiallized, $db_connection;
 
-	if(!$db_initiallized)
+	if(!db_initiallized)
 	{
 		$db_connection = mysql_connect("mysql.cs.orst.edu", "cs275_wasingej", "7406");
 		if(!$db_connection)
@@ -25,7 +25,7 @@ db_init();
 $db = mysql_select_db("cs275_wasingej", $db_connection);
 if(!$db)
 {
-	echo "Database failure!";
+	echo 'Database failure!';
 }
 
 $query = 'SELECT * FROM User';
