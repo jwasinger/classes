@@ -1,3 +1,4 @@
+
 <html lan="en">
 	<head>
 	</head>
@@ -14,14 +15,20 @@
 				<input type="submit" value="Login" name="login"/>
 			</div>
 		</form>
+
 		<?php 
-			if($user_login_fail)
+
+			if($_GLOBAL['user_login_fail'] == true)
 			{
-				echo('<div> Login credentials could not be verified </div>');
+				echo '<div> Login credentials could not be verified </div>';
+			}
+			else
+			{
+				echo "no error";
 			}
 		?>
 
-		<button onclick="window.location.href='../php/new_user.html'"> Create Account </button>
+		<button onclick="window.location.href='./html/new_user.html'"> Create Account </button>
 
 	</body>
 </html>
