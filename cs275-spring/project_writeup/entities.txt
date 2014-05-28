@@ -1,0 +1,28 @@
+Customer
+--------
+username  : CHAR(32)
+password  : CHAR(32)
+money_amt : REAL
+
+Manager
+-------
+username 	 : CHAR(32)
+password 	 : CHAR(32)
+restaurant_money : REAL
+
+Order
+-----
+order_id : INTEGER
+cost 	 : REAL
+
+Item
+----
+name  : CHAR(32) 
+price : REAL
+
+Ingredient
+----------
+name	    : CHAR(32)
+expire_date : DATE
+qty	    : INTEGER
+

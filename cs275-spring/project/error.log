@@ -1,6 +1,1 @@
 
-[Tue May 27 15:30:02.824544 2014] [:error] [pid 15220] [client 127.0.0.1:59881] PHP Notice:  Undefined variable: user_login_fail in /home/jared/classes/cs275-spring/project/html/index.html on line 21
-[Tue May 27 15:30:13.790352 2014] [:error] [pid 1402] [client 127.0.0.1:59882] PHP Notice:  Undefined variable: db in /home/jared/classes/cs275-spring/project/php/new_user.php on line 7, referer: http://localhost/html/new_user.html
-[Tue May 27 15:30:13.790430 2014] [:error] [pid 1402] [client 127.0.0.1:59882] PHP Notice:  Undefined variable: db_connection in /home/jared/classes/cs275-spring/project/php/new_user.php on line 15, referer: http://localhost/html/new_user.html
-[Tue May 27 15:30:13.790467 2014] [:error] [pid 1402] [client 127.0.0.1:59882] PHP Warning:  mysql_query() expects parameter 2 to be resource, null given in /home/jared/classes/cs275-spring/project/php/new_user.php on line 15, referer: http://localhost/html/new_user.html
-[Tue May 27 15:30:13.790499 2014] [:error] [pid 1402] [client 127.0.0.1:59882] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, null given in /home/jared/classes/cs275-spring/project/php/new_user.php on line 16, referer: http://localhost/html/new_user.html

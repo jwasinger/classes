@@ -1,30 +1,42 @@
 <?php 
+	
+	include "connect.php";
+
 	$username = $_POST['username'];
 	$password = $_POST['password'];
-	$password = md5($password);
+	$password2 = $_POST['password2'];
+	//$password = md5($password); for now use plain text
 
-	if(!$db)
+	if(strcmp($password,$password2) != 0)
 	{
-		echo 'Could not connect to \'Users\' database';
+		echo '<script> alert("Passwords are not equal!") </script>';
+		header('new_user.html');
+		//or exit()?
 	}
+
 
 	//see if the username already exists
 	$query = 'SELECT * FROM Users
-			  WHERE username=$username, password=$password;';
+			  WHERE username="'.$username.'"';
 	
 	$result = mysql_query($query, $db_connection);
-	if(mysql_num_rows($result) == 0)
+	if(!$result)
+	{
+		echo "mysql failed".mysql_error();
+	}
+
+	if(mysql_num_rows($result) != 0)
 	{
 		echo '<script language="javascript">
 				 alert("account already exists") 
 			  </script>';
+
+		header('Location: ../html/new_user.html');
 	}
 	else
 	{
 		$query = 'INSERT INTO Users
-				  VALUES ("'.$username.'", "'.$password.'");';
-
-		
+				  VALUES ("'.$username.'", "'.$password.'", "customer");';
 
 		$result = mysql_query($query);
 
@@ -34,7 +46,8 @@
 		}
 		else
 		{
-			header('Location: index.php');
+			echo "wat";
+			header('Location: user_home.php');
 		}
 	}
 ?>
