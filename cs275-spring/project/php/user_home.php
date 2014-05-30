@@ -1,4 +1,4 @@
 <?php
 
-echo "correct login!";
+include "../html/user_home.html";
 ?>
