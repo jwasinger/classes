@@ -36,7 +36,7 @@
 	else
 	{
 		$query = 'INSERT INTO Users
-				  VALUES ("'.$username.'", "'.$password.'", "customer");';
+				  VALUES ("'.$username.'", "'.$password.'", "customer", 0);';
 
 		$result = mysql_query($query);
 
