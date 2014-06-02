@@ -46,7 +46,6 @@
 		}
 		else
 		{
-			echo "wat";
 			header('Location: user_home.php');
 		}
 	}
