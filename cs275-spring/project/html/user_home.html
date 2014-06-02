@@ -30,6 +30,10 @@
 			}
 
 			echo "</table>";
+			echo '<form method="get" action="../php/edit_order.php" >';
+			echo '	<input type="hidden" name="order_num" value="'.$orders[$i]->order_id.'"/>';
+			echo '	<input type="submit" value="edit">';
+			echo '</form>';
 		}
 
 		echo "</div>";

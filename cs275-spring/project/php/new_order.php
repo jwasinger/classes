@@ -20,7 +20,7 @@
 // }
 
 //get the items the user ordered based on values contained in the submitted POST form
-function get_order_items()
+function get_form_items()
 {
 	$items = array();
 
@@ -46,13 +46,9 @@ if($_SERVER['REQUEST_METHOD'] === 'GET')
 }
 else
 {
-	$order = new Order();
-	$order->username = 'wasingej'; //TODO: allow other usernames to be used!
-	$order->order_id = get_highest_order_id() + 1;
-	$order->items = get_order_items();
-	$order->price = calculate_items_cost($order->items);
-	$order->combos = null;
-	add_user_order('wasingej', $order);
+	$username = 'wasingej'; //TODO: allow other usernames to be used!
+	$items = get_form_items();
+	add_user_order($username, $items);
 
 	header('Location: ../php/user_home.php');
 }

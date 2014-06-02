@@ -47,9 +47,7 @@ class Item
 function get_all_items()
 {
 	$items = array();
-	$v = $_SESSION['username'];
-	echo $v;
-	
+
 	$query = mysql_query('SELECT * FROM Items');
 	if(!$query)
 	{
@@ -88,33 +86,17 @@ function calculate_items_cost($items)
 	return $count;
 }
 
-function add_user_order($username, $order)
+function delete_user_order($order_id)
 {
-	$new_order_id = get_highest_order_id() + 1;
-	$new_order_cost = calculate_items_cost($order->items);
-	$query = mysql_query('INSERT INTO Orders (cost, order_id, customer)
-						  VALUES ('.$new_order_cost.','.$new_order_id.', "'.$username.'")');
+	$query = mysql_query('DELETE FROM Orders 
+						  WHERE order_id ='.$order_id);
 
 	if(!$query)
 	{
-		echo "MySQL error: ".mysql_error();
+		echo "MySQL Error: ".mysql_error();
 		die();
 	}
-
-	for($i = 0; $i < count($order->items); $i++)
-	{
-
-		$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
-							  VALUES ('.$new_order_id.', "'.$order->items[$i]->name.'")');
-
-		if(!$query)
-		{
-			echo "MySQL error:".mysql_error();
-			die();
-		}
-	}
 }
-
 
 function get_user_orders($username)
 {
@@ -161,5 +143,219 @@ function get_user_orders($username)
 
 	return $orders;
 }
+
+function get_order_items_counts($order_id, $username)
+{
+	$dict = null;
+	$target_order = null;
+
+	$all_orders = get_user_orders($username);
+	for($i=0; $i<count($all_orders); $i++)
+	{
+		if($all_orders[$i]->order_id == $order_id)
+		{
+			$target_order = $all_orders[$i];			
+		}
+	}
+
+	for($i=0; $i<count($target_order->items); $i++)
+	{
+		if(isset($dict[$target_order->items[$i]->name]))
+		{
+			$dict[$target_order->items[$i]->name] += 1;
+		}
+		else
+		{
+			$dict[$target_order->items[$i]->name] = 1;
+		}
+	}
+
+	return $dict;
+}
+
+// function __update_orders_items_relation($order_id, $new_items, $old_items_counts)
+// {
+// 	$small_fries_offset = 0;
+// 	$small_drink_offset = 0;
+
+// 	$new_items_counts = array();
+
+// 	for($i=0; $i<count($new_items); $i++)
+// 	{
+// 		if(isset($new_items_counts[$new_items[$i]->name]))
+// 		{
+// 			$new_items_counts[$new_items[$i]->name] += 1;
+// 		}
+// 		else
+// 		{
+// 			$new_items_counts[$new_items[$i]->name] = 1;
+// 		}
+// 	}
+
+// 	//calculate the offsets
+// 	if(isset($new_items_counts['small_fries']) && isset($old_items_counts['small_fries']))
+// 	{
+// 		$small_fries_offset = $new_items_counts['small_fries'] - $old_items_counts['small_fries'];
+// 	}
+// 	else if(isset($new_items_counts['small_fries']) && !isset($old_items_counts['small_fries']))
+// 	{
+// 		$small_fries_offset = $new_items_counts['small_fries'];
+// 	}
+
+// 	if(isset($new_items_counts['small_drink']) && isset($old_items_counts['small_drink']))
+// 	{
+// 		$small_drink_offset = $new_items_counts['small_drink'] - $old_items_counts['small_drink'];
+// 		echo "hey";
+// 	}
+// 	else if(isset($new_items_counts['small_drink']) && !isset($old_items_counts['small_drink']))
+// 	{
+// 		$small_drink_offset = $new_items_counts['small_drink'];
+// 		echo "sup";
+// 	}
+
+// 	echo $old_items_counts['small_fries'].' '.$old_items_counts['small_drink'];
+// 	echo '<br>';
+// 	echo count($new_items).' '.$small_fries_offset.' '.$small_drink_offset;
+	
+// 	die();
+
+// 	//update tables
+// 	if($small_fries_offset < 0)
+// 	{
+// 		$small_fries_offset *= -1;
+// 		for($i=0; $i<$small_fries_offset; $i++)
+// 		{
+// 			$query = mysql_query('DELETE FROM Items_Orders
+// 								  WHERE order_id='.$order_id.' AND item_name=\'small_fries\'
+// 								  LIMIT 1');
+
+// 			if(!$query)
+// 			{
+// 				echo "MySQL Error: ".mysql_error();
+// 				die();
+// 			}
+// 		}
+// 	}
+// 	else if($small_fries_offset > 0)
+// 	{
+// 		for($i=0; $i<$small_fries_offset; $i++)
+// 		{
+// 			$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
+// 								  VALUES ('.$order_id.', item_name="small_fries")
+// 								  ');
+
+// 			if(!$query)
+// 			{
+// 				echo "MySQL Error: ".mysql_error();
+// 				die();
+// 			}
+// 		}
+// 	}
+
+// 	if($small_drink_offset < 0)
+// 	{
+// 		$small_drink_offset *= -1;
+// 		for($i=0; $i<$small_drink_offset; $i++)
+// 		{
+// 			$query = mysql_query('DELETE * FROM Items_Orders
+// 								  WHERE order_id='.$order_id.' AND item_name=\'small_drink\'
+// 								  LIMIT 1');
+
+// 			if(!$query)
+// 			{
+// 				echo "MySQL Error: ".mysql_error();
+// 				die();
+// 			}
+// 		}
+// 	}
+// 	else if($small_drink_offset > 0)
+// 	{
+// 		for($i=0; $i<$small_drink_offset; $i++)
+// 		{
+// 			$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
+// 								  VALUES ('.$order_id.', item_name="small_drink")
+// 								  ');
+			
+// 			if(!$query)
+// 			{
+// 				echo "MySQL Error: ".mysql_error();
+// 				die();
+// 			}
+// 		}
+// 	}
+// }
+
+function modify_order_items($order_id, $items)
+{
+	$query = mysql_query('SELECT * FROM Orders 
+						  WHERE order_id='.$order_id.'');
+
+	if(!$query)
+	{
+		echo "MySQL Error: ".mysql_error();
+		die();
+	}
+
+	$new_order_cost = calculate_items_cost($items);
+	$query = mysql_query('UPDATE Orders 
+						  SET cost='.$new_order_cost.'
+						  WHERE order_id='.$order_id);
+
+	if(!$query)
+	{
+		echo "MySQL Error: ".mysql_error();
+		die();
+	}
+
+	//update Items_Orders relation
+	$query = mysql_query('DELETE FROM Items_Orders
+						  WHERE order_id='.$order_id);
+	if(!$query)
+	{
+		echo "MySQL Error: ".mysql_error();
+		die();
+	}
+
+	for($i = 0; $i < count($items); $i++)
+	{
+
+		$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
+							  VALUES ('.$order_id.', "'.$items[$i]->name.'")');
+
+		if(!$query)
+		{
+			echo "MySQL error:".mysql_error();
+			die();
+		}
+	}
+}
+
+function add_user_order($username, $items)
+{
+	$new_order_id = get_highest_order_id() + 1;
+	$new_order_cost = calculate_items_cost($items);
+	$query = mysql_query('INSERT INTO Orders (cost, order_id, customer)
+						  VALUES ('.$new_order_cost.','.$new_order_id.', "'.$username.'")');
+
+	if(!$query)
+	{
+		echo "MySQL error: ".mysql_error();
+		die();
+	}
+
+	for($i = 0; $i < count($items); $i++)
+	{
+
+		$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
+							  VALUES ('.$new_order_id.', "'.$items[$i]->name.'")');
+
+		if(!$query)
+		{
+			echo "MySQL error:".mysql_error();
+			die();
+		}
+	}
+}
+
 
 ?>

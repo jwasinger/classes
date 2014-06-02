@@ -1,0 +1,29 @@
+<html lan="en">
+	<head>
+	</head>
+	<body>
+		<form action="../php/edit_order.php" method="post">
+			<?php
+			
+
+			$items = get_all_items();
+			$small_fries_qty = 0;
+			$small_drink_qty = 0;
+
+			$user_items_counts = get_order_items_counts($_SESSION['order_id'], $_SESSION['username']);
+			for($i=0; $i < count($items); $i++)
+			{
+				echo $items[$i]->name.': ';
+				echo '<input type="text" name="'.$items[$i]->name.'_qty" value="'.$user_items_counts[$items[$i]->name].'" />'; 
+			}
+
+			?>
+
+			<input type="submit" value="Submit changes" />
+		</form>
+
+		<form action="../php/user_home.php" method="get">
+			<input type="submit" value="cancel" />
+		</form>
+	</body>
+</html>
