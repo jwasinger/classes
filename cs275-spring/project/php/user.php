@@ -47,7 +47,9 @@ class Item
 function get_all_items()
 {
 	$items = array();
-
+	$v = $_SESSION['username'];
+	echo $v;
+	
 	$query = mysql_query('SELECT * FROM Items');
 	if(!$query)
 	{
@@ -90,13 +92,26 @@ function add_user_order($username, $order)
 {
 	$new_order_id = get_highest_order_id() + 1;
 	$new_order_cost = calculate_items_cost($order->items);
-	$query = mysql_query('INSERT INTO Orders
-						  VALUES ('.$new_order_cost.','.$new_order_id.','.$username.')');
+	$query = mysql_query('INSERT INTO Orders (cost, order_id, customer)
+						  VALUES ('.$new_order_cost.','.$new_order_id.', "'.$username.'")');
 
 	if(!$query)
 	{
 		echo "MySQL error: ".mysql_error();
 		die();
+	}
+
+	for($i = 0; $i < count($order->items); $i++)
+	{
+
+		$query = mysql_query('INSERT INTO Items_Orders (order_id, item_name)
+							  VALUES ('.$new_order_id.', "'.$order->items[$i]->name.'")');
+
+		if(!$query)
+		{
+			echo "MySQL error:".mysql_error();
+			die();
+		}
 	}
 }
 
