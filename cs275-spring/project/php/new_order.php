@@ -34,11 +34,29 @@ function get_form_items()
 		$items[] = new Item('small_drink', 2.5);
 	}
 
+	for($i = 0; $i < $_POST['cheese_burger_qty']; $i++)
+	{
+		$items[] = new Item('cheese_burger', 4.2);
+	}
+
+	for($i = 0; $i < $_POST['veggie_burger_qty']; $i++)
+	{
+		$items[] = new Item('veggie_burger', 2);
+	}
+	
+	for($i = 0; $i < $_POST['ice_cream_qty']; $i++)
+	{
+		$items[] = new Item('ice_cream', 1);
+	}
+
 	return $items;
 }
 
+
 require_once('connect.php');
 include 'user.php';
+
+@session_start();
 
 if($_SERVER['REQUEST_METHOD'] === 'GET')
 {
@@ -46,7 +64,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET')
 }
 else
 {
-	$username = 'wasingej'; //TODO: allow other usernames to be used!
+	$username = $_SESSION['username']; //TODO: allow other usernames to be used!
 	$items = get_form_items();
 	add_user_order($username, $items);
 

@@ -1,6 +1,7 @@
 
 <html lan="en">
 	<head>
+		<link rel="stylesheet" type="text/css" href="../css/index.css">
 	</head>
 
 	<body>
@@ -17,14 +18,9 @@
 		</form>
 
 		<?php 
-
-			if($_GET['user_login_fail'] == true)
+			if(isset($_GET['user_login_fail']) && ($_GET['user_login_fail'] == true) )
 			{
 				echo '<div> Login credentials could not be verified </div>';
-			}
-			else
-			{
-				echo "no error";
 			}
 		?>
 

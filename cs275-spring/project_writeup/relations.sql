@@ -6,17 +6,6 @@ CREATE TABLE Users(		username	CHAR(32),
 						PRIMARY KEY (username),
 					 );
 
-CREATE TABLE Orders(	customer    CHAR(32)
-						order_id 	INTEGER,
-						cost	 	REAL,
-
-						PRIMARY KEY (order_id),
-
-						FOREIGN KEY (customer) REFERENCES Customer 
-							ON DELETE CASCADE
-							ON UPDATE CASCADE
-				  );
-
 CREATE TABLE Items(		name	CHAR(32),
 						price	REAL,
 

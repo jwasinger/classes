@@ -96,6 +96,15 @@ function delete_user_order($order_id)
 		echo "MySQL Error: ".mysql_error();
 		die();
 	}
+
+	$query = mysql_query('DELETE FROM Items_Orders
+						  WHERE order_id = '.$order_id);
+
+	if(!$query)
+	{
+		echo "MySQL Error: ".mysql_error();
+		die();
+	}
 }
 
 function get_user_orders($username)

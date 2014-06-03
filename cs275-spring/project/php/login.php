@@ -31,7 +31,6 @@ if($login && mysql_num_rows($login) == 1)
 }
 else
 {
-	//$GLOBALS['user_login_fail'] = true;
 	header('Location: ../index.php?user_login_fail=true');
 }
 

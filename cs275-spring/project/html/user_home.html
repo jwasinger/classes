@@ -1,5 +1,6 @@
 <html lan="en">
 	<head>
+		<link rel="stylesheet" type="text/css" href="../css/index.css">
 	</head>
 
 	<body>
@@ -11,21 +12,22 @@
 
 		<?php 
 		echo "<div>";
-		echo "	Current Orders:";
+		echo "	Current Orders: <br>";
 		$orders = get_user_orders($_SESSION['username']);
 
 		for($i = 0; $i < count($orders); $i++)
 		{
-			echo "Order ID: ".$orders[$i]->order_id." ";
-			echo "Order Price".$orders[$i]->price." ";
+			echo "<b>Order ID: </b>".$orders[$i]->order_id." ";
+			echo "<b>Order Price: </b>$".$orders[$i]->price." ";
 
 			echo "<table>";
 
+			echo "<tr> <th>Item Name</th> <th>Item Price</th> <tr>";
 			for($j = 0; $j < count($orders[$i]->items); $j++)
 			{
 				echo "<tr>";
-				echo "<td> Item name: ".$orders[$i]->items[$j]->name."</td>";
-				echo "<td> Item price: ".$orders[$i]->items[$j]->price."</td>";
+				echo "<td>".$orders[$i]->items[$j]->name."</td>";
+				echo "<td>".$orders[$i]->items[$j]->price."</td>";
 				echo "</tr>";
 			}
 
@@ -33,6 +35,11 @@
 			echo '<form method="get" action="../php/edit_order.php" >';
 			echo '	<input type="hidden" name="order_num" value="'.$orders[$i]->order_id.'"/>';
 			echo '	<input type="submit" value="edit">';
+			echo '</form>';
+
+			echo '<form method="post" action="../php/delete_order.php" >';
+			echo '	<input type="hidden" name="order_num" value="'.$orders[$i]->order_id.'"/>';
+			echo '	<input type="submit" value="delete">';
 			echo '</form>';
 		}
 
