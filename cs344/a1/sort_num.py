@@ -10,7 +10,6 @@ def __comp__(w1, w2):
         return 0
 
     shortest = (len(w1) if len(w1) < len(w2) else len(w2))
-    pdb.set_trace()
 
     for i in range(shortest):
         #case where i is at index of shortest word and both words begin the same (example: hello and hellooo)
@@ -42,8 +41,7 @@ def __insert_kv_into_ordered__(kv, ordered_list):
             return 
         if(kv[1] == ordered_list[i][1]):
             #do alphabetic comparison
-            pdb.set_trace()
-            res = __comp__(kv[1], ordered_list[i][1])
+            res = __comp__(kv[0], ordered_list[i][0])
             if res == 1:
                 ordered_list.insert(i, kv)
                 return 
