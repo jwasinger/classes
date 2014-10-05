@@ -1,3 +1,4 @@
+import pdb
 
 def __comp__(w1, w2):
 ###
@@ -9,8 +10,15 @@ def __comp__(w1, w2):
         return 0
 
     shortest = (len(w1) if len(w1) < len(w2) else len(w2))
-    
-    for i in range(shortest):
+    for i in range(shortest):        
+        #case where i is at index of shortest word and both words begin the same (example: hello and hellooo)
+        #hello should go before hellooo
+        if i == shortest - 1:
+            if len(w2) == shortest:
+                return 2
+            else:
+                return 1
+
         if ord(w1[i]) > ord(w2[i]):
             return 1
         elif ord(w1[i]) < ord(w2[i]):
@@ -26,7 +34,7 @@ def __insert_kv_into_ordered__(kv, ordered_list):
     #
     ###
     for i in range(len(ordered_list)):
-        if __comp__(ordered_list[i][0], kv[0]) == 1:
+        if __comp__(ordered_list[i][0], kv[0]) == 2:
             ordered_list.insert(i, kv)
             return 
     
@@ -44,4 +52,4 @@ def sort(word_dict):
     for item in items:
         __insert_kv_into_ordered__(item, ordered_list)
 
-    return items
+    return ordered_list
