@@ -1,6 +1,26 @@
 #! /usr/bin/python
 
 import sys, collections
+import sort_alpha, sort_num
+
+def parse_words(line):
+###
+#
+# create a list of words present in a string containing a line of input.  spaces and non-letter
+# characters delineate words.
+#
+###
+    curr_word = ''
+    words = []
+    for c in line:
+        if c.isalpha():
+            curr_word += c
+        else:
+            if curr_word != '':
+                words.append(curr_word)
+    
+    return words
+
 
 def create_word_dict():
 ###
@@ -13,13 +33,11 @@ def create_word_dict():
     for line in sys.stdin:
         line = line.strip("\n")
 
-        words = line.split(" ") 
-        for word in words:
-            
-            if not word:
-                continue
-            word = word.lower()
-             
+        #words = line.split(" ") 
+        line = line.tolower()
+        words = parse_words(line)
+
+        for word in words:     
             #try and get the word out of the dictionary, if it's not in the dict, add the word
             try:
                 word_dict[word] += 1
@@ -70,6 +88,10 @@ def insert_kv_into_ordered(kv, ordered):
                 continue
     #tuples have been iterated and the kv tuple has not been placed so add it now (ordered last)
     ordered.append(kv)
+
+def order_words_alpha(word_dict):
+
+def order_words_num(word_dict):
 
 def create_ordered_word_list(word_dict):
     output_dict = collections.OrderedDict()
