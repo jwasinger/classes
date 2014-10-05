@@ -28,12 +28,12 @@ def create_word_dict():
 # Create an unordered dictionary of {key: word (str), value: prevalence (int)}
 #
 ###
-   word_dict = dict()
+    word_dict = dict()
 
     for line in sys.stdin:
-        line = line.strip("\n")
+        line = line.strip(n)
 
-        #words = line.split(" ") 
+        #words = line.split( ) 
         line = line.tolower()
         words = parse_words(line)
 
@@ -46,7 +46,7 @@ def create_word_dict():
 
     return word_dict
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     word_dict = create_word_dict()
     sorted_alpha = sort_alpha.sort()
     sorted_num = sort_num.sort()
