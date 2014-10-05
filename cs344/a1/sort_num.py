@@ -37,7 +37,7 @@ def __insert_kv_into_ordered__(kv, ordered_list):
             if res == 1:
                 ordered.insert(i, kv)
                 return 
-            else
+            else:
                 continue
     #tuples have been iterated and the kv tuple has not been placed so add it now (ordered last)
     ordered.append(kv)

@@ -26,7 +26,7 @@ def __insert_kv_into_ordered__(kv, ordered_list):
     #
     ###
     for i in range(len(ordered_list)):
-        if __comp__(ordered_list[i][0], kv[0]) == 1):
+        if __comp__(ordered_list[i][0], kv[0]) == 1:
             ordered_list.insert(i, kv)
             return 
     
