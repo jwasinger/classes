@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/python2.7
 
 import sys, collections, pdb
 import sort_alpha, sort_num
