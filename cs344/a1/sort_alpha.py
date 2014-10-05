@@ -20,9 +20,9 @@ def __comp__(w1, w2):
                 return 1
 
         if ord(w1[i]) > ord(w2[i]):
-            return 1
-        elif ord(w1[i]) < ord(w2[i]):
             return 2
+        elif ord(w1[i]) < ord(w2[i]):
+            return 1
         else:
             continue
     

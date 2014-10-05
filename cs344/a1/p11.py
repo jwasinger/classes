@@ -46,11 +46,33 @@ def create_word_dict(text):
         for word in words:     
             #try and get the word out of the dictionary, if it's not in the dict, add the word
             try:
-                word_dict[word] += 1
+                word_dict[word]  += 1
             except KeyError:
                 word_dict[word] = 1
 
     return word_dict
+
+def print_vowels(text):
+    vowels = {}
+    vowels['a'] = 0
+    vowels['e'] = 0
+    vowels['i'] = 0
+    vowels['o'] = 0 
+    vowels['u'] = 0
+
+    for c in text:
+        if c == 'a':
+            vowels['a'] += 1 
+        elif c == 'e':
+            vowels['e'] += 1
+        elif c == 'i':
+            vowels['i'] += 1
+        elif c == 'o':
+            vowels['o'] += 1
+        elif c == 'u':
+            vowels['u'] += 1
+    
+    print vowels
 
 if __name__ == '__main__':
 
@@ -64,3 +86,6 @@ if __name__ == '__main__':
 
     print("=== PRINTED IN NUMERIC-ORDER===")
     print(sorted_num)
+
+    print("=== VOWEL COUNT ===")
+    print_vowels(text)
