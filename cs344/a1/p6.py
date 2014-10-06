@@ -1,5 +1,5 @@
 #! /usr/bin/python
-import sys, getopt, os
+import sys, getopt, os, pdb
 
 def get_opt_value(opt_str, opts):
     for opt in opts:
@@ -15,7 +15,7 @@ def mkdir_p(path_to_dir, dir_name):
         print "directory: " + dir_name + " already exists"
 
 if __name__ == "__main__":
-    optlist, args = getopt.getopt(sys.argv[1:], 't:c:', ['term', 'class'])
+    optlist, args = getopt.getopt(sys.argv[1:], 't:c:', ['term=', 'class='])
     
     if get_opt_value('-t', optlist) and get_opt_value('--term', optlist):
         print "error argument supplied twice"
@@ -27,10 +27,10 @@ if __name__ == "__main__":
     
     term = ''
     cls = ''
-
+   
     if get_opt_value('-c', optlist):
         cls = get_opt_value('-c', optlist)
-    else if get_opt_value('--class', optlist):
+    elif get_opt_value('--class', optlist):
         cls = get_opt_value('--class', optlist)
     else:
         print "error class argument requred"
@@ -38,12 +38,12 @@ if __name__ == "__main__":
 
     if get_opt_value('-t', optlist):
         term = get_opt_value('-t', optlist)
-    else if get_opt_value('--term', optlist)
+    elif get_opt_value('--term', optlist):
         term = get_opt_value('--term', optlist)
     else:
         print "error, term argument required"
         quit(1)
-
+    
     mkdir_p(term + '/' + cls + '/', 'assignments')
     mkdir_p(term + '/' + cls + '/', 'examples')
     mkdir_p(term + '/' + cls + '/', 'exams')

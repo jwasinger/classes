@@ -2,6 +2,7 @@ from scipy import stats
 import numpy
 import math
 import pdb
+import sys
 
 def mean(vals):
     num_vals = len(vals)
@@ -50,7 +51,7 @@ def kurtosis(vals):
 
 if __name__ == "__main__":
     
-    vals =[1,2,3,4,5,6,7,8,9,10]
+    vals = sys.stdin.read().split('\n')
 
     my_mean = mean(vals)
     true_mean = numpy.mean(vals)
