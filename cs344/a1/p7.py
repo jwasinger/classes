@@ -1,3 +1,5 @@
+#! /bin/python
+
 import sys, urllib2, pdb
 
 if __name__ == "__main__":
