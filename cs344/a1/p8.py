@@ -1,6 +1,10 @@
 #! /usr/bin/python
 
-import subprocess
+import subprocess, sys, pdb
 
 if __name__ == "__main__":
-    print subprocess.call("cal")
+    args_str = ''
+    for arg in sys.argv[1:]:
+        args_str += arg + ' '
+    
+    print subprocess.call("cal"+' ' + args_str, shell=True)

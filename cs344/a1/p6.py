@@ -1,5 +1,5 @@
 #! /usr/bin/python
-import sys, getopt, os, pdb
+import sys, getopt, os, pdb, subprocess
 
 def get_opt_value(opt_str, opts):
     for opt in opts:
@@ -49,4 +49,7 @@ if __name__ == "__main__":
     mkdir_p(term + '/' + cls + '/', 'exams')
     mkdir_p(term + '/' + cls + '/', 'lecture_notes')
     mkdir_p(term + '/' + cls + '/', 'submissions')
- 
+    
+    pdb.set_trace()
+    cmd_str = 'ln -s /usr/local/classes/eecs/' + term + '/' + cls + '/src src_class'
+    subprocess.call(cmd_str, shell=True) 
