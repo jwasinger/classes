@@ -67,10 +67,7 @@ if __name__ == "__main__":
             del vals[i]
         else:
             vals[i] = float(vals[i])
-    
-    print vals
-    print len(vals)
-        
+       
     my_mean = mean(vals)
     true_mean = numpy.mean(vals)
 

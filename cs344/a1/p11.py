@@ -79,13 +79,13 @@ if __name__ == '__main__':
     text = sys.stdin.read()    
     word_dict = create_word_dict(text)
     sorted_alpha = sort_alpha.sort(word_dict)
-    sorted_num = sort_num.sort(word_dict)
+    #sorted_num = sort_num.sort(word_dict)
 
     print("=== PRINTED IN ALPHA-ORDER ===")
     print(sorted_alpha)
 
-    print("=== PRINTED IN NUMERIC-ORDER===")
-    print(sorted_num)
+    #print("=== PRINTED IN NUMERIC-ORDER===")
+    #print(sorted_num)
 
     print("=== VOWEL COUNT ===")
     print_vowels(text)
