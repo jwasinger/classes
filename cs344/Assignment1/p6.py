@@ -1,4 +1,9 @@
 #! /usr/bin/python
+#Name: Jared Wasinger
+#ONID Email:  wasingej@onid.oregonstate.edu
+#Class CS344-001
+#Assignment #1
+
 import sys, getopt, os, pdb, subprocess
 
 def get_opt_value(opt_str, opts):

@@ -1,5 +1,10 @@
 #! /usr/bin/python
 
+#Name: Jared Wasinger
+#ONID Email:  wasingej@onid.oregonstate.edu
+#Class: CS344-001
+#Assignment #1
+
 from scipy import stats
 import numpy
 import math
