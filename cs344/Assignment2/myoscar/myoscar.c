@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdlib.h>
+
 #define ACTION_ADD_MEMBERS          0
 #define ACTION_ADD_ALL              1    
 #define ACTION_CLEANSE              2
@@ -15,6 +20,12 @@
 #define ACTION_UNMARK               11
 #define ACTION_VERBOSE              12
 #define ACTION_VERSION              13
+
+int error_exit()
+{
+	printf("ERROR: %s\n", strerror(errno));
+	_Exit(-1);
+}
 
 int get_action(char *c_arg)
 {
@@ -78,16 +89,56 @@ int get_action(char *c_arg)
     return -1;
 }
 
+int print_verbose(char *str)
+{
+	/* TODO: only print str if verbose mode is enabled */
+	printf(strcat(str, "\n"));
+}
+
+int open_archive(char *file_name, int *fd_out)
+{
+	int fd = -1;
+	
+	/* try and open the file 'file_name' */
+	fd = open(file_name, O_RDWR, 0);
+	if(fd == -1)
+	{
+		if(errno == ENOENT)
+		{
+			/* file doesn't exist, create it */
+			printf("creating file '%s'\n", file_name);
+			
+			fd = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
+			if(fd == -1)
+			{
+				error_exit();	
+			}
+
+		}
+	}
+	
+	/* if it exists see if it is a valid archive and return -1 if not */
+    	
+	/* if it doesn't exist create the file */
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
     if(argc == 1)
     {
         printf("*** Archive file not specified\n");
-        printf("*** Exiting...\n");        
+        printf("*** Exiting...\n");
+		_Exit(-1);
     }
     
     /* see what action(s) to be performed */
     char *action = argv[1];
     
-    printf("%d",get_action(argv[1]));
+    printf("%d\n",get_action(argv[1]));
+
+	int fd;
+	open_archive("asdf", &fd);
+	return 0;
 }
