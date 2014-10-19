@@ -64,6 +64,11 @@ int get_file_lines(int fd, char ***lines_out, int *num_lines)
 	return 0;
 }
 
+int get_file_lines(int fd, char ***lines_out, int first_line, int last_line)
+{
+	
+}
+
 /* retrieve one line from a file */
 int get_file_line(int fd, int line_num, char **line)
 {
