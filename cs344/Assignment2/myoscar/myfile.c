@@ -1,91 +1,76 @@
+
+/* http://stackoverflow.com/questions/3501338/c-read-file-line-by-line */
+
 #include "myfile.h"
+#include <stdio.h>
 
-
-int __get_num_lines(int fd, int *num_lines_out)
+int __get_num_lines(FILE *fp, int *num_lines_out)
 {
-	int numread = 0;
-	char buff[256];
-	
-	while((numread = read(fd, (void *)buff, 256)) > 0)
-	{
-		for(int i = 0; i < numread; i++)
-		{
-			if (buff[i] == '\n')
-			{
-				(*num_lines_out)++;
-			}
-		}
-	}
-
-	if(numread == -1)
+	if(!fp)
 	{
 		return -1;
 	}
 
+	char *line = NULL;
+	size_t len = 0;
+	int read = -1;
+	while((read = getline(&line, &len, fp)) != -1)
+	{
+		(*num_lines_out)++;
+	}
+	
+	/* return file seek position to origin so it can be read again */
+	if(fseek(fp, 0, SEEK_SET) == -1)
+	{
+		return -1;
+	}
 	return 0;
 }
 
 /* retrieve all lines in a file specified by 'fd'. The return value is a 
    pointer to dynamically allocated 2D array of the lines */
-int get_file_lines(int fd, char ***lines_out)
+int get_file_lines(int fd, char ***lines_out, int *num_lines)
 {
-	int num_lines = 0;
-	if(!lines_out)
-	{
-		printf("invalid arg lines_out");
-		return -1;
-	}
-	
-	num_lines = __get_num_lines(fd, &num_lines);
-	if(num_lines == -1)
+	FILE *fp = NULL;
+	char *line = NULL;
+	size_t len = 0;
+	int i;
+
+	fp = fdopen(fd, "r");
+	if(fp == NULL)
 	{
 		return -1;
 	}
 	
-	char **lines = (char **)malloc(sizeof(char *) * num_lines);
-	if(!lines)
+	if(__get_num_lines(fp, num_lines) == -1)
 	{
 		return -1;
 	}
 
-	char curr_line[MAX_LINE_LENGTH];
-	char buff[MAX_LINE_LENGTH];
-	short write_pos = 0;
-	
-	for( int i = 0; i < num_lines, i++ )
+	(*lines_out) = malloc(sizeof(char *) * (*num_lines));
+	int *x = malloc(sizeof(int) * 5);
+	for(i = 0; i < (*num_lines); i++)
 	{
-		int num_read = 0;
-		int num_to_read = 0;
-		while(true)
-		{
-			num_read = read(fd, buff, MAX_LINE_LENGTH - num_to_read);
-			if(num_read == -1)
-			{	
-				return -1;
-			}
-			
-			for(int j = 0; j < num_read; j++)
-			{
-				if
-			}
+		int read = getline(&line, &len, fp);
+		if(read == -1)
+			break;
 
-			num_to_read = MAX_LINE_LENGTH - num_read;
-			if(num_to_read == 0)
-			{
-				
-				break;
-			}
-		}
+		/* copy string from the local variable line, to its appropriate place in line_lengths_out*/
+		(*lines_out)[i] = malloc(sizeof(char) * (len+1));
+		memcpy((*lines_out)[i], line, sizeof(char) * len);
+		(*lines_out)[i][len] = '\0';
 	}
+
+	return 0;
 }
 
 /* retrieve one line from a file */
 int get_file_line(int fd, int line_num, char **line)
 {
-	
+	return -1;	
 }
 
 int remove_file_line(int fd, int line_num)
 {
-	
+	return -1;	
 }

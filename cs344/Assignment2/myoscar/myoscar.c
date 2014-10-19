@@ -92,7 +92,9 @@ int get_action(char *c_arg)
 int print_verbose(char *str)
 {
 	/* TODO: only print str if verbose mode is enabled */
-	printf(strcat(str, "\n"));
+	char *print_str = strcat(str, "\n");
+	printf(print_str);
+	return 0;
 }
 
 int open_archive(char *file_name, int *fd_out)
@@ -118,7 +120,20 @@ int open_archive(char *file_name, int *fd_out)
 	}
 	
 	/* if it exists see if it is a valid archive and return -1 if not */
-    	
+    char **lines = NULL;
+	int num_lines;
+
+	if(get_file_lines(fd, &lines, &num_lines) == -1)
+	{
+		return -1;
+	}
+
+	int i = 0;
+	for(; i < num_lines; i++)
+	{
+		printf(lines[i]);
+	}
+
 	/* if it doesn't exist create the file */
 
 	return 0;
@@ -139,6 +154,6 @@ int main(int argc, char **argv)
     printf("%d\n",get_action(argv[1]));
 
 	int fd;
-	open_archive("asdf", &fd);
+	open_archive("test", &fd);
 	return 0;
 }
