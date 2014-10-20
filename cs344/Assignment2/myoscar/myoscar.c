@@ -10,6 +10,7 @@
 
 #include "cmd_line_args.h"
 #include "myfile.h"
+#include "archive.h"
 
 int error_exit()
 {
@@ -44,7 +45,7 @@ int main(int argc, char **argv)
         _Exit(-1);
     }
     
-    
-    //open_archive("test", &fd);
+    struct Archive *archive;
+    open_archive("test", archive);
 	return 0;
 }

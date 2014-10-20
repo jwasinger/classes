@@ -6,15 +6,17 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 #include "oscar.h"
 
-typedef struct Archive;
+struct Archive;
 
 /* try and open the archive file 'file_name', create a new archive if the file doesn't exist */
-int open_archive(char *file_name, Archive *out_archive);
+int open_archive(char *file_name, struct Archive *out_archive);
 
 /* write out the archive to disk */
-int write_archive(char *file_name, Archive archive);
+int write_archive(char *file_name, struct Archive *archive);
 
+int read_archive(int fd, struct Archive **archive);
 #endif

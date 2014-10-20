@@ -27,7 +27,6 @@ typedef struct
 {
     char arc_file[OSCAR_MAX_FILE_NAME_LEN];
   
-    char arc_file[32]; 
     char **files;
     int num_files;
     int actions;
