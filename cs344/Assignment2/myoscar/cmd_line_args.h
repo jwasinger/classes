@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include <stdio.h>
-//#include "oscar.h"
+#include "oscar.h"
 
 #define ACTION_ADD_MEMBERS          1
 #define ACTION_ADD_ALL              2    
@@ -25,7 +25,7 @@
 
 typedef struct
 {
-    //char arc_file[OSCAR_MAX_FILE_NAME_LEN];
+    char arc_file[OSCAR_MAX_FILE_NAME_LEN];
   
     char arc_file[32]; 
     char **files;
