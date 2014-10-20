@@ -1,3 +1,0 @@
-on problem 10, when calculating skewness, there is an issue with floating point precision where the final answer that is computed by my skewness function is not 0 (but very close).  Is this an issue?
-
-add redirection/input capability for problem 10

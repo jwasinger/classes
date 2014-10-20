@@ -1,13 +1,22 @@
-CC = 			gcc 
-GXX_FLAGS = 	-std=gnu11 -g -Wall
+CC =			gcc 
+GXX_FLAGS =		-std=gnu11 -g -Wall
 
-TARGET = 		myoscar
-OUTPUT_DIR = 	./bin
+SOURCE =		
+TARGET =		myoscar
+OUTPUT_DIR =	./bin
 
-myfile.o:
-	$(CC) -C myfile.h myfile.c
+myfile.o: 
+	$(CC) -c myfile.h myfile.c
 
-debug:
-	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GXX_FLAGS) ./*.h ./*.c
+cmd_line_args.o: 
+	$(CC) -c cmd_line_args.h cmd_line_args.c
+
+myoscar.o: 
+	$(CC) -c myoscar.c
+
+debug: myfile.o cmd_line_args.o myoscar.o
+
+	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GXX_FLAGS) myfile.o cmd_line_args.o myoscar.o
+
 clean:
-	rm -rf ./bin/*
+	rm -rf ./*.h.gch ./*.o
