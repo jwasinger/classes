@@ -23,6 +23,73 @@ struct Archive
     char archive_name[32];
 };
 
+int read_line(char **line_ptr, int *n, int fd)
+{
+    //read out in increments of READ_BUFF_SIZE
+    //if a '\n' is read, copy the contents of the buffer into line_ptr
+    //then lseek back to the character right after the \n
+    int res = 0;
+    int write_pos = 0; //write position within line_ptr
+    char tmp_buff[READ_BUFF_SIZE]; //temporary buffer to read portions of the line into
+    int i = 0;
+    int read_pos = 0;
+
+    char *out_buff = malloc(READ_BUFF_SIZE);
+    int out_buff_cap = READ_BUFF_SIZE;
+
+    //while(haven't read to the end of the file || haven't read to a \n)
+    while((res = read(fd, tmp_buff, READ_BUFF_SIZE)) != 0)
+    {
+        if(res == -1)
+        {
+            printf("file read error\n");
+            return -1;
+        }
+            
+        for(; i < res; i++)
+        {
+            if(tmp_buff[i] == '\n')
+            {        
+                memcpy(out_buff+write_pos, tmp_buff, i+1);// copy the buffer to the index where the \n is
+                *n = i + 1; // is this correct?
+                (*line_ptr) = out_buff; 
+                write_pos += i + 1;
+                
+                off_t cur_offset = lseek(fd, 0, SEEK_CUR);
+                lseek(fd, cur_offset - (res - (i+1)), SEEK_SET);// lseek to the char right after the \n ( (size of buffer-1) - index of \n)
+ 
+                return 0;
+            }
+        }
+        
+        if(res < READ_BUFF_SIZE)
+        {
+            //end of file has been reached, copy the contents of the buffer to line_ptr
+            memcpy(out_buff+write_pos, tmp_buff, res);
+            *n = write_pos + i + 1; // is this correct?
+            return 1;
+        }
+
+        //text has been read but still on same line.  Copy all characters from the tmp_buff and advance write_pos
+        memcpy(out_buff+write_pos, tmp_buff, i+1);
+
+        write_pos += i + 1;
+      
+        if(write_pos == out_buff_cap)
+        {
+            out_buff_cap *= 2;
+            char *tmp = malloc(out_buff_cap);
+            memcpy(tmp, out_buff, sizeof(out_buff));
+            free(out_buff);
+            out_buff = tmp;
+        }
+
+        i = 0;
+    }
+
+    return 0;
+}
+
 /* expand the array of files in an archive structure if we reach the end of 'files' */ 
 int __expand_archive(struct Archive *archive)
 {
@@ -37,64 +104,6 @@ int __expand_archive(struct Archive *archive)
     /* delete the old array */
     free(archive->files);
     archive->files = new_array;
-    return 0;
-}
-
-int read_line(int fd, char **line_ptr, size_t *n)
-{
-    int read_buff_size = 128;
-    char *buff = malloc(read_buff_size);
-    char *tmp = NULL;
-    int res = 0;
-    int write_pos = 0;
-    int start = 0;
-
-    while((res = read(fd, buff, read_buff_size)) == 0)
-    {   
-        bytes_read = strlen(buff);
-        start = write_pos;
-        for (; write_pos < bytes_read; write_pos++)
-        {
-            if(buff[write_pos] == '\n')
-            {
-                *n = write_pos - start;
-                strncpy(*line_ptr, buff, *n);
-                return 0;
-            }
-            else if(buff[write_pos] == '\0')
-            {
-                *n = write_pos - start;
-                strncpy(*line_ptr, buff, *n);
-                return 1;  
-            }
-
-
-        }
-
-        
-        if(strlen(buff) < read_buff_size)
-        {
-            *n = 
-            break;
-        }
-
-        /* expand the size of 'buff' and copy the current contents over to the new larger buffer */
-        /* this covers the case where a line in the file could be ridiculously long */
-        read_buff_size *= 2;
-        tmp = malloc(read_buff_size);
-        memcpy(tmp, buff, read_buff_size/2);
-        buff = tmp;
-        tmp = NULL;
-    }
-
-    if(res == -1)
-    {
-        printf("read() failed \n");
-        free(buff);
-        return -1;
-    }
-
-    *line_ptr = buff;
     return 0;
 }
 
@@ -132,6 +141,9 @@ int read_archive(int fd, struct Archive **archive)
 
     while((res = getline(&line, &len, fp)) != 0)
     {
+        //seek forward in the file when bytes are read 
+        //lseek(fd, len, SEEK_CUR);
+
         if(state == STATE_READ_ARCHIVE_HEADER)
         {
             //try and read out archive header and fail if it's not there
@@ -178,6 +190,13 @@ int read_archive(int fd, struct Archive **archive)
                 printf("\nreading file data failed for %s\n", current_file->hdr.oscar_name);
                 return -1;
             }
+            if(strlen(current_file->file_data) != current_file->file_size)
+            {
+                printf("\ninvalid file size\n");
+                return -1;
+            }
+
+            //fseek(fp, current_file->file_size, SEEK_CUR);
             state = STATE_READ_FILE_HEADER;
         }
     }
@@ -214,26 +233,20 @@ int open_archive(char *file_name, struct Archive *out_archive)
 	}
 	
 	/* if it exists see if it is a valid archive and return -1 if not */
-    char *line;
-    int len;
-    int res;
-    while((res = read_line(fd, &line, &len)) != -1)
-    {
-        if(res == 1)
-            break;
-
-        printf(line);
-        printf("\n");
-        free(line);
-    }
-
-    struct Archive *archive = NULL;
-    if(read_archive(fd, &archive) != -1)
-    {
-        return -1;
-    }
+    
+    //struct Archive *archive = NULL;
+    //if(read_archive(fd, &archive) != -1)
+    //{
+    //    return -1;
+    //}
 
 	/* if it doesn't exist create the file */
+    char *line = NULL;
+    int n = 0;
+    while(read_line(&line, &n, fd) != 1)
+    {
+        printf("%s", line);
+    }
 
 	return 0;
 }
