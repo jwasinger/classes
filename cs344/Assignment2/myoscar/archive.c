@@ -6,6 +6,8 @@
 
 #define OSCAR_HDR_SIZE 240
 
+#define READ_BUFF_SIZE 128
+
 struct ArchiveFile
 {
     struct oscar_hdr hdr;
@@ -35,6 +37,64 @@ int __expand_archive(struct Archive *archive)
     /* delete the old array */
     free(archive->files);
     archive->files = new_array;
+    return 0;
+}
+
+int read_line(int fd, char **line_ptr, size_t *n)
+{
+    int read_buff_size = 128;
+    char *buff = malloc(read_buff_size);
+    char *tmp = NULL;
+    int res = 0;
+    int write_pos = 0;
+    int start = 0;
+
+    while((res = read(fd, buff, read_buff_size)) == 0)
+    {   
+        bytes_read = strlen(buff);
+        start = write_pos;
+        for (; write_pos < bytes_read; write_pos++)
+        {
+            if(buff[write_pos] == '\n')
+            {
+                *n = write_pos - start;
+                strncpy(*line_ptr, buff, *n);
+                return 0;
+            }
+            else if(buff[write_pos] == '\0')
+            {
+                *n = write_pos - start;
+                strncpy(*line_ptr, buff, *n);
+                return 1;  
+            }
+
+
+        }
+
+        
+        if(strlen(buff) < read_buff_size)
+        {
+            *n = 
+            break;
+        }
+
+        /* expand the size of 'buff' and copy the current contents over to the new larger buffer */
+        /* this covers the case where a line in the file could be ridiculously long */
+        read_buff_size *= 2;
+        tmp = malloc(read_buff_size);
+        memcpy(tmp, buff, read_buff_size/2);
+        buff = tmp;
+        tmp = NULL;
+    }
+
+    if(res == -1)
+    {
+        printf("read() failed \n");
+        free(buff);
+        return -1;
+    }
+
+    *line_ptr = buff;
     return 0;
 }
 
@@ -97,10 +157,12 @@ int read_archive(int fd, struct Archive **archive)
             }
             
             /*copy the line data into the header struct */
-            (*archive)->num_files++;
+
  
             current_file = &((*archive)->files[(*archive)->num_files]);
             memcpy(&(current_file->hdr), line, OSCAR_HDR_SIZE);
+    
+            (*archive)->num_files++;
             
             int i_size = atoi(current_file->hdr.oscar_size);
             current_file->file_data = malloc(i_size);
@@ -152,7 +214,19 @@ int open_archive(char *file_name, struct Archive *out_archive)
 	}
 	
 	/* if it exists see if it is a valid archive and return -1 if not */
-    
+    char *line;
+    int len;
+    int res;
+    while((res = read_line(fd, &line, &len)) != -1)
+    {
+        if(res == 1)
+            break;
+
+        printf(line);
+        printf("\n");
+        free(line);
+    }
+
     struct Archive *archive = NULL;
     if(read_archive(fd, &archive) != -1)
     {
