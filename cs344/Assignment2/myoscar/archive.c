@@ -353,10 +353,12 @@ int open_archive(char *file_name, struct Archive **out_archive, int create)
 }
 
 /* create and populate the fields of an ArchiveFile struct */
+/* return -1 if error, or the value of the file descriptor for the created file if success*/
 int __create_archive_file(char *file_name, struct ArchiveFile** out_archive_file)
 {
     struct oscar_hdr hdr; 
     struct stat st;
+    int res = 0;
     int fd = 0;
     int error = 0;
     char *file_size = NULL;
@@ -388,22 +390,43 @@ int __create_archive_file(char *file_name, struct ArchiveFile** out_archive_file
 
     file_size = itoa(st.st_size, OSCAR_FILE_SIZE+1);
     name_len = itoa(strlen(file_name), 2+1);
-     
-    strcpy(hdr.oscar_size, file_size);
+    adate = itoa(st.st_birthtime, OSCAR_DATE_SIZE);
+    mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
+    uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
+    gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
+    mode = itoa(st.st_mode, OSCAR_MODE_SIZE);
 
-    
+
     strcpy(hdr.oscar_name, file_name);
-    
-
     strncpy(hdr.oscar_name_len, name_len, 2);
-
-    
     strcpy(hdr.oscar_cdate, st.st_birthtime); //does st.st_birthtime exist?
     strcpy(hdr.oscar_adate, st.);
     strcpy(hdr.oscar_mdate, st.st_mtime);
+    strcpy(hdr.oscar_uid, uid); // st.st_uid user_id
+    strcpy(hdr.oscar_gid, gid); // st.st_gid group id
+    strcpy(hdr.oscar_mode, mode); // st.st_mode file mode
+    strcpy(hdr.oscar_size, file_size); 
+    hdr.oscar_deleted = ' ';
+    strcpy(hdr.oscar_hdr_end, OSCAR_HDR_END);
 
+    free(uid);
+    free(gid);
+    free(adate);
+    free(mdate);
+    free(mode);
     free(file_size);
     free(name_len);
+
+    //write the header to the disk
+    res = write(fd, (void *)hdr, sizeof(struct oscar_hdr));
+    if(res == -1)
+    {
+        error = errno;
+        printf("Error writing oscar header to %s: %s\n", file_name, strerror(error));
+        return -1;
+    }
+
+    return fd;
 }
 
 int archive_add_files(struct Archive *archive, char **file_names, int num_files)
@@ -411,6 +434,7 @@ int archive_add_files(struct Archive *archive, char **file_names, int num_files)
     int num_files = 0;
     struct ArchiveFile *files = NULL;
     int i = 0;
+    
 
     files = malloc(sizeof(ArchiveFile) * num_files);
     for(; i < num_files; i++)
