@@ -8,22 +8,7 @@
 
 #define READ_BUFF_SIZE 128
 
-struct ArchiveFile
-{
-    struct oscar_hdr hdr;
-    char *file_data;
-    int file_size;
-};
-
-struct Archive
-{
-    struct ArchiveFile *files;
-    int size_files; /* capacity of 'files' array */
-    int num_files; /* number of ArchiveFiles in array */
-    char archive_name[32];
-};
-
-int read_line(char **line_ptr, int *n, int fd)
+int __read_line(char **line_ptr, int *n, int fd)
 {
     //read out in increments of READ_BUFF_SIZE
     //if a '\n' is read, copy the contents of the buffer into line_ptr
@@ -110,12 +95,19 @@ int __expand_archive(struct Archive *archive)
     return 0;
 }
 
-int write_archive(char *file_name, struct Archive *archive)
+void free_archive(struct Archive *archive)
 {
-    
+    int i = 0;
+    if(!archive)
+        return;
+
+    for(; i < archive->num_files; i++)
+    {
+        free(archive->files[i]);
+    }
 }
 
-int read_archive(int fd, struct Archive **archive)
+int __read_archive(int fd, struct Archive **archive)
 {
     if(!fd || !archive)
         return -1;
@@ -135,7 +127,7 @@ int read_archive(int fd, struct Archive **archive)
     
     strcpy((*archive)->archive_name,"test");
 
-    //while((res = read_line(&line, &len, fd)) != 1)
+    //while((res = __read_line(&line, &len, fd)) != 1)
     while(1)
     {
         //seek forward in the file when bytes are read 
@@ -143,7 +135,7 @@ int read_archive(int fd, struct Archive **archive)
 
         if(state == STATE_READ_ARCHIVE_HEADER)
         {
-            res = read_line(&line, &len, fd);
+            res = __read_line(&line, &len, fd);
             if(res == 1)
             {
                 printf("unexpected EOF encountered\n");
@@ -165,7 +157,7 @@ int read_archive(int fd, struct Archive **archive)
         }
         else if(state == STATE_READ_FILE_HEADER)
         { 
-            res = read_line(&line, &len, fd);
+            res = __read_line(&line, &len, fd);
             if(res == 1)
             {
                 break;
@@ -237,7 +229,76 @@ int read_archive(int fd, struct Archive **archive)
     return 0;
 }
 
-int open_archive(char *file_name, struct Archive *out_archive)
+int __write_file(int fd, const struct ArchiveFile *file)
+{
+    int res = -1;
+
+    res = write(fd, (void *)&(file->hdr), OSCAR_HDR_SIZE);
+    if(res != OSCAR_HDR_SIZE)
+    {
+        printf("less bytes written than expected while writing file header\n");
+        return -1;
+    }
+    
+    res = write(fd, (void *)file->file_data, file->file_size);
+    if(res != file->file_size)
+    {
+        printf("less bytes written than expected while writing file data\n");
+        return -1;
+    }
+    
+    return 0;
+}
+
+int write_archive(char *file_name, const struct Archive *archive)
+{
+    int fd = -1;
+    int res = -1;
+    char *oscar_hdr_str = OSCAR_ID;
+    int i = 0;
+
+    res = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
+
+    if(res == -1)
+    {
+        printf("Error opening file: %s\n", strerror(errno));
+        return -1;
+    }
+    else
+    {
+        fd = res;
+    }
+
+    /* write the archive header */
+    res = write(fd, (void *)oscar_hdr_str, OSCAR_ID_LEN); 
+    if(res < OSCAR_ID_LEN)
+    {
+        printf("Less bytes written than attempted\n");
+        printf("Error(?): %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* write each of the archives files */
+    for(; i < archive->num_files; i++)
+    {
+        if(__write_file(fd, &(archive->files[i])) == -1)
+            return -1;
+    }
+
+    return 0;
+}
+
+Archive *__create_archive(char *archive_name)
+{
+    Archive *arc = malloc(sizeof(Archive));
+    arc->size_files = 0;
+    arc->num_files = 0;
+    strcpy(arc->archive_name, archive_name);
+    arc->files = NULL;
+    return arc;
+}
+
+int open_archive(char *file_name, struct Archive **out_archive, int create)
 {
 	int fd = -1;
 	
@@ -247,25 +308,34 @@ int open_archive(char *file_name, struct Archive *out_archive)
 	{
 		if(errno == ENOENT)
 		{
-			/* file doesn't exist, create it */
-			printf("creating file '%s'\n", file_name);
-			
-			fd = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
-			if(fd == -1)
-			{
-				error_exit();	
-			}
-
+			if(create == 1)
+            {
+                /* file doesn't exist, create it */
+                printf("creating file '%s'\n", file_name);
+                
+                fd = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
+                if(fd == -1)
+                {
+                    error_exit();	
+                }
+                
+                //fill out an empty archive struct and exit
+                (*out_archive) 
+            }
+            else
+            {
+                printf("file %s doesn't exist and create != 1\n", file_name);
+                return -1;
+            }
 		}
 	}
 	
-	/* if it exists see if it is a valid archive and return -1 if not */
-    
-    struct Archive *archive = NULL;
-    if(read_archive(fd, &archive) == -1)
+	/* if it exists see if it is a valid archive and return -1 if not */ 
+    if(__read_archive(fd, out_archive) == -1)
     {
         return -1;
     }
+    close(fd);
 
 	return 0;
 }

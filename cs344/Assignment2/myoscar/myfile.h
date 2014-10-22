@@ -1,22 +1,25 @@
 #ifndef MYFILE_H
 #define MYFILE_H
 
-#include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
+#include <stdio.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <dirent.h>
 
-#define MAX_LINE_LENGH 256
+int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files);
+int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files);
 
-/* retrieve all lines in a file specified by 'fd'. The return value is a 
-   pointer to dynamically allocated 2D array of the lines */
-int get_file_lines(int fd, char ***lines, int *num_lines);
+/* internal functions in myfile.c
 
+int __get_pwd_reg_files(char ***file_names, int *num_files)
 
-/* retrieve one line from a file */
-int get_file_line(int fd, int line_num, char **line);
+int __get_pwd_files(char ***file_names, int *num_files)
 
-int remove_file_line(int fd, int line_num);
+int __load_file(char *file_name, char **file_data, int *size)
 
+void __free_arrays(char **files_data, char **file_names, int *sizes, int num)
+*/
 #endif

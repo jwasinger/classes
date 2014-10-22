@@ -10,13 +10,26 @@
 
 #include "oscar.h"
 
-struct Archive;
+struct ArchiveFile
+{
+    struct oscar_hdr hdr;
+    char *file_data;
+    int file_size;
+};
 
-/* try and open the archive file 'file_name', create a new archive if the file doesn't exist */
-int open_archive(char *file_name, struct Archive *out_archive);
+struct Archive
+{
+    struct ArchiveFile *files;
+    int size_files; /* capacity of 'files' array */
+    int num_files; /* number of ArchiveFiles in array */
+    char archive_name[32];
+};
+
+/* try and open the archive file 'file_name', create a new archive if the file doesn't exist and 'create'=1 */
+int open_archive(char *file_name, struct Archive *out_archive, int create);
 
 /* write out the archive to disk */
-int write_archive(char *file_name, struct Archive *archive);
+int write_archive(char *file_name, const struct Archive *archive);
 
-int read_archive(int fd, struct Archive **archive);
+void free_archive(struct Archive *archive);
 #endif

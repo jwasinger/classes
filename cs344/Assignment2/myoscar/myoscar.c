@@ -27,10 +27,29 @@ int print_verbose(char *str)
 	return 0;
 }
 
+int add_files(struct Archive *archive, char **files, int num_files)
+{
+    
+}
 
+void pwd_test(void)
+{
+    char **file_names = NULL;
+    int num_files = 0;
+    int i = 0;
+
+    get_pwd_files(&file_names, &num_files);
+
+    for(;i < num_files; i++)
+    {
+        printf("%s\n", file_names[i]);
+    }
+}
 
 int main(int argc, char **argv)
 {
+    struct Archive *archive = NULL;
+
     if(argc == 1)
     {
         printf("*** Archive file not specified\n");
@@ -38,19 +57,44 @@ int main(int argc, char **argv)
 		_Exit(-1);
     }
     
+    pwd_test(); 
+    
     CMDArgs cmd_args;
     if(proc_cmd_line_args(argc, argv, &cmd_args) == -1)
     {
         printf("Failure!\n");
         _Exit(-1);
     }
-    
+
     struct Archive *archive;
-    if(open_archive("test", archive) == -1)
+    //if(open_archive("test", archive) == -1)
+    //{
+    //    printf("failure\n");
+    //    _Exit(-1);
+    //}
+    
+    //if there is no archive file supplied exit
+
+    if(cmd_args.num_files == 0)
     {
-        printf("failure\n");
+        printf("no files specified... exiting...\n");
+        _Exit(-1);
+    }
+    res = open_archive(cmd_args.files[0], &archive, 1);
+    if(res == -1)
+    {   
         _Exit(-1);
     }
 
+    if (cmd_args.actions & ACTION_ADD_MEMBERS)
+    {
+        
+        return 0;
+    }
+    else if (cmd_args.actions & ACTION_ADD_ALL)
+    {
+        
+        return 0;
+    }
 	return 0;
 }
