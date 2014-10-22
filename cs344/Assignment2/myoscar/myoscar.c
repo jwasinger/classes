@@ -46,6 +46,11 @@ int main(int argc, char **argv)
     }
     
     struct Archive *archive;
-    open_archive("test", archive);
+    if(open_archive("test", archive) == -1)
+    {
+        printf("failure\n");
+        _Exit(-1);
+    }
+
 	return 0;
 }

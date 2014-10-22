@@ -4,7 +4,7 @@
 #define STATE_READ_FILE_HEADER 1
 #define STATE_READ_FILE 2
 
-#define OSCAR_HDR_SIZE 240
+#define OSCAR_HDR_SIZE 123
 
 #define READ_BUFF_SIZE 128
 
@@ -33,16 +33,16 @@ int read_line(char **line_ptr, int *n, int fd)
     char tmp_buff[READ_BUFF_SIZE]; //temporary buffer to read portions of the line into
     int i = 0;
     int read_pos = 0;
-
+    char *error_str = NULL;
     char *out_buff = malloc(READ_BUFF_SIZE);
     int out_buff_cap = READ_BUFF_SIZE;
-
+    
     //while(haven't read to the end of the file || haven't read to a \n)
     while((res = read(fd, tmp_buff, READ_BUFF_SIZE)) != 0)
     {
         if(res == -1)
         {
-            printf("file read error\n");
+            printf("file read error: %s\n", strerror(errno));
             return -1;
         }
             
@@ -86,6 +86,9 @@ int read_line(char **line_ptr, int *n, int fd)
 
         i = 0;
     }
+    
+    if(res  < READ_BUFF_SIZE)
+        return 1;    
 
     return 0;
 }
@@ -124,13 +127,6 @@ int read_archive(int fd, struct Archive **archive)
     size_t len = 0;
     FILE *fp = NULL;
     struct ArchiveFile *current_file = NULL;
-
-    fp = fdopen(fd, "r");
-    if(fp == NULL)
-    {
-        printf("\nfdopen() failed\n");
-        return -1;
-    }
     
     (*archive) = malloc(sizeof(struct Archive));
     (*archive)->num_files = 0;
@@ -139,13 +135,26 @@ int read_archive(int fd, struct Archive **archive)
     
     strcpy((*archive)->archive_name,"test");
 
-    while((res = getline(&line, &len, fp)) != 0)
+    //while((res = read_line(&line, &len, fd)) != 1)
+    while(1)
     {
         //seek forward in the file when bytes are read 
         //lseek(fd, len, SEEK_CUR);
 
         if(state == STATE_READ_ARCHIVE_HEADER)
         {
+            res = read_line(&line, &len, fd);
+            if(res == 1)
+            {
+                printf("unexpected EOF encountered\n");
+                return -1;
+            }
+            else if (res == -1)
+            {
+                printf("file read failure\n");
+                return -1;
+            }
+
             //try and read out archive header and fail if it's not there
             if(strcmp(line, OSCAR_ID) != 0)
             {
@@ -155,11 +164,22 @@ int read_archive(int fd, struct Archive **archive)
             state = STATE_READ_FILE_HEADER;
         }
         else if(state == STATE_READ_FILE_HEADER)
-        {
+        { 
+            res = read_line(&line, &len, fd);
+            if(res == 1)
+            {
+                break;
+            }
+            else if (res == -1)
+            {
+                printf("\nfile read failure\n");
+                return -1;
+            }
+ 
             //try and read out file header and fail if it's not there
             if(len != OSCAR_HDR_SIZE)
             {
-                printf("\nInvalid file header size\n");
+                printf("\nInvalid file header size: %d\n", len);
                 return -1;
             }
 
@@ -184,11 +204,18 @@ int read_archive(int fd, struct Archive **archive)
         }
         else if(state == STATE_READ_FILE)
         {
+
+            res = read(fd, current_file->file_data, current_file->file_size);
             //read out file data until the end of the 'file' is reached
-            if(read(fd, current_file->file_data, current_file->file_size) != 0)
+            if(res == -1)
             {
                 printf("\nreading file data failed for %s\n", current_file->hdr.oscar_name);
                 return -1;
+            }
+            else if( res == 0)
+            {
+               printf("\nunexpected EOF for %s\n", current_file->hdr.oscar_name);
+               return -1;
             }
             if(strlen(current_file->file_data) != current_file->file_size)
             {
@@ -234,18 +261,10 @@ int open_archive(char *file_name, struct Archive *out_archive)
 	
 	/* if it exists see if it is a valid archive and return -1 if not */
     
-    //struct Archive *archive = NULL;
-    //if(read_archive(fd, &archive) != -1)
-    //{
-    //    return -1;
-    //}
-
-	/* if it doesn't exist create the file */
-    char *line = NULL;
-    int n = 0;
-    while(read_line(&line, &n, fd) != 1)
+    struct Archive *archive = NULL;
+    if(read_archive(fd, &archive) == -1)
     {
-        printf("%s", line);
+        return -1;
     }
 
 	return 0;
