@@ -23,15 +23,16 @@
 #define ERROR_INVALID_ARC           1
 #define ERROR_NO_ACTIONS            2
 
-typedef struct
+struct CMDArgs
 {
     char arc_file[OSCAR_MAX_FILE_NAME_LEN];
   
     char **files;
     int num_files;
     int actions;
-} CMDArgs;
+};
 
 int proc_cmd_line_args(int argc, char **argv, CMDArgs *out_cmd_args);
 
+void free_CMDArgs(struct CMDArgs **cmd_args);
 #endif

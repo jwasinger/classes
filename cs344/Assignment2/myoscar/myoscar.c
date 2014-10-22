@@ -49,24 +49,21 @@ void pwd_test(void)
 int main(int argc, char **argv)
 {
     struct Archive *archive = NULL;
-
+    struct CMDArgs *cmd_args;
+    
     if(argc == 1)
     {
         printf("*** Archive file not specified\n");
         printf("*** Exiting...\n");
 		_Exit(-1);
     }
-    
-    pwd_test(); 
-    
-    CMDArgs cmd_args;
-    if(proc_cmd_line_args(argc, argv, &cmd_args) == -1)
+
+    if(proc_cmd_line_args(argc, argv, cmd_args) == -1)
     {
         printf("Failure!\n");
         _Exit(-1);
     }
 
-    struct Archive *archive;
     //if(open_archive("test", archive) == -1)
     //{
     //    printf("failure\n");
@@ -75,26 +72,40 @@ int main(int argc, char **argv)
     
     //if there is no archive file supplied exit
 
-    if(cmd_args.num_files == 0)
+    if(cmd_args->num_files == 0)
     {
         printf("no files specified... exiting...\n");
         _Exit(-1);
     }
-    res = open_archive(cmd_args.files[0], &archive, 1);
+    res = open_archive(cmd_args->files[0], &archive, 1);
     if(res == -1)
     {   
         _Exit(-1);
     }
 
-    if (cmd_args.actions & ACTION_ADD_MEMBERS)
+    if (cmd_args->actions & ACTION_ADD_MEMBERS)
     {
+        //create an array containing all the files that need to be added
+        char **file_array = malloc(sizeof(char *)*cmd_args->num_files - 1);
+        for(i = 1; i < cmd_args->num_files; i++)
+        {
+            file_array[i] = cmd_args->files[i];
+        }
         
+        //add the values
+        res = archive_add_files(archive, file_array, cmd_args->num_files -1); 
+        free(file_array);
+        if(res==-1)
+            return -1;
+
         return 0;
     }
-    else if (cmd_args.actions & ACTION_ADD_ALL)
+    else if (cmd_args->actions & ACTION_ADD_ALL)
     {
-        
+
         return 0;
     }
+    free_archive(&archive);
+    free_CMDargs(&cmd_args);
 	return 0;
 }

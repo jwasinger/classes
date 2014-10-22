@@ -1,5 +1,6 @@
 #include "archive.h"
 
+
 #define STATE_READ_ARCHIVE_HEADER 0
 #define STATE_READ_FILE_HEADER 1
 #define STATE_READ_FILE 2
@@ -7,6 +8,14 @@
 #define OSCAR_HDR_SIZE 123
 
 #define READ_BUFF_SIZE 128
+
+/* http://stackoverflow.com/questions/1114741/how-to-convert-int-to-char-c */
+char *itoa(int n, int out_size)
+{
+    char *output = malloc(sizeof(char) * out_size);
+    sprintf(output, "%d", n);
+    return output;
+}
 
 int __read_line(char **line_ptr, int *n, int fd)
 {
@@ -95,16 +104,18 @@ int __expand_archive(struct Archive *archive)
     return 0;
 }
 
-void free_archive(struct Archive *archive)
+void free_archive(struct Archive **archive)
 {
     int i = 0;
-    if(!archive)
+    if(!(*archive))
         return;
 
-    for(; i < archive->num_files; i++)
+    for(; i < (*archive)->num_files; i++)
     {
-        free(archive->files[i]);
+        free((*archive)->files[i]);
     }
+
+    (*archive) = NULL;
 }
 
 int __read_archive(int fd, struct Archive **archive)
@@ -291,10 +302,10 @@ int write_archive(char *file_name, const struct Archive *archive)
 Archive *__create_archive(char *archive_name)
 {
     Archive *arc = malloc(sizeof(Archive));
-    arc->size_files = 0;
+    arc->size_files = 10;
     arc->num_files = 0;
     strcpy(arc->archive_name, archive_name);
-    arc->files = NULL;
+    arc->files = malloc(Sizeof(ArchiveFile) * 10);
     return arc;
 }
 
@@ -320,7 +331,8 @@ int open_archive(char *file_name, struct Archive **out_archive, int create)
                 }
                 
                 //fill out an empty archive struct and exit
-                (*out_archive) 
+                (*out_archive) = __create_archive(file_name);
+                return 0;
             }
             else
             {
@@ -335,8 +347,86 @@ int open_archive(char *file_name, struct Archive **out_archive, int create)
     {
         return -1;
     }
-    close(fd);
 
+    close(fd);
 	return 0;
 }
 
+/* create and populate the fields of an ArchiveFile struct */
+int __create_archive_file(char *file_name, struct ArchiveFile** out_archive_file)
+{
+    struct oscar_hdr hdr; 
+    struct stat st;
+    int fd = 0;
+    int error = 0;
+    char *file_size = NULL;
+    char *name_len = NULL;
+    char *adate = NULL;
+    char *mdate = NULL;
+    char *uid = NULL;
+    char *gid = NULL;
+    char *mode = NULL;
+    char deleted;
+    char sha1[OSCAR_SHA_DIGEST_LEN];
+    
+    *out_archive_file = malloc(sizeof(ArchiveFile));
+    fd = open(file_name, O_RDONLY, 0);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("Error opening file %s:%s", file_name, strerror(errno));
+        return -1;
+    }
+    
+    fd = fstat(file_name, &st);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("Error fstat'ing file %s:%s", file_name, strerror(errno));
+        return -1;
+    }
+
+    file_size = itoa(st.st_size, OSCAR_FILE_SIZE+1);
+    name_len = itoa(strlen(file_name), 2+1);
+     
+    strcpy(hdr.oscar_size, file_size);
+
+    
+    strcpy(hdr.oscar_name, file_name);
+    
+
+    strncpy(hdr.oscar_name_len, name_len, 2);
+
+    
+    strcpy(hdr.oscar_cdate, st.st_birthtime); //does st.st_birthtime exist?
+    strcpy(hdr.oscar_adate, st.);
+    strcpy(hdr.oscar_mdate, st.st_mtime);
+
+    free(file_size);
+    free(name_len);
+}
+
+int archive_add_files(struct Archive *archive, char **file_names, int num_files)
+{
+    int num_files = 0;
+    struct ArchiveFile *files = NULL;
+    int i = 0;
+
+    files = malloc(sizeof(ArchiveFile) * num_files);
+    for(; i < num_files; i++)
+    {
+             
+    }
+
+    free(files);
+}
+
+int archive_del_files(struct Archive *archive, char *file_names, int num_files)
+{
+    
+}
+
+int archive_add_reg_files(struct Archive *archive)
+{
+    
+}
