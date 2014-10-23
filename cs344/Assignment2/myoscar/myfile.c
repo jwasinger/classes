@@ -245,7 +245,7 @@ int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_o
     return 0;
 }
 
-int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files)
+int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files_out)
 {
     int num_files = 0;    
     int res = 0;
@@ -268,5 +268,6 @@ int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_nam
         }
     }
 
+    *num_files_out = num_files;
     return 0;
 }

@@ -32,7 +32,7 @@ struct CMDArgs
     int actions;
 };
 
-int proc_cmd_line_args(int argc, char **argv, CMDArgs *out_cmd_args);
+int proc_cmd_line_args(int argc, char **argv, struct CMDArgs *out_cmd_args);
 
 void free_CMDArgs(struct CMDArgs **cmd_args);
 #endif

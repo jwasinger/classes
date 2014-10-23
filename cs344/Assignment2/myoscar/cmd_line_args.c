@@ -1,11 +1,11 @@
 #include "cmd_line_args.h"
 
-int proc_cmd_line_args(int argc, char **argv, CMDArgs *out_cmd_args)
+int proc_cmd_line_args(int argc, char **argv, struct CMDArgs *out_cmd_args)
 {
     if(!out_cmd_args || !argv)
         return -1;
     
-    memset(out_cmd_args, 0, sizeof(CMDArgs));
+    memset(out_cmd_args, 0, sizeof(struct CMDArgs));
     
     int num_files = 0;
     int files_write_pos = 0;

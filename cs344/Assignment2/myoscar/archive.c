@@ -33,7 +33,7 @@ int __create_oscar_hdr(int fd, struct oscar_hdr *hdr_out)
     int res = 0;
     int error = 0;
 
-    res = fstat(file_name, &st);
+    res = fstat(fd, &st);
     if(res == -1)
     {
         error = errno;
