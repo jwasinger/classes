@@ -456,7 +456,7 @@ void __archive_add_file(struct Archive *archive, struct ArchiveFile *archive_fil
 
 /* create and populate the fields of an ArchiveFile struct */
 /* return -1 if error, or the value of the file descriptor for the created file if success*/
-int __create_archive_file(char *file_name, struct ArchiveFile** out_archive_file)
+int __populate_arc_file_struct(char *file_name, struct ArchiveFile** out_archive_file)
 {
     struct oscar_hdr hdr; 
     struct stat st;
@@ -546,7 +546,7 @@ int archive_add_files(struct Archive *archive, char **file_names, int num_files)
             return -1;    
         else if(cmp == 0)
         {
-            res = __create_archive_file(file_names[i], &file, &arc_file);
+            res = __populate_arc_file_struct(file_names[i], &file, &arc_file);
             if(res == -1)
                 return -1;
 
@@ -554,7 +554,7 @@ int archive_add_files(struct Archive *archive, char **file_names, int num_files)
             if(res == -1)
                 return -1;
         }
-      //else if(cmp == 1) print something in verbose mode here...
+        //else if(cmp == 1) print something in verbose mode here...
     }
 
     free(files);

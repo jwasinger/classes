@@ -218,13 +218,13 @@ int load_files(char **file_names, int num_files, char ***files_data, int **sizes
     return 0;
 }
 
-int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files)
+int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files_out)
 {
     int num_files = 0;    
     int res = 0;
     int i = 0;
     
-    res = __get_pwd_files(file_names_out, &num_files)
+    res = __get_pwd_files(file_names_out, &num_files);
     if(res == -1)
         return -1;
     
@@ -240,7 +240,8 @@ int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_o
             return -1;
         }
     }
-
+    
+    *num_files_out = num_files;
     return 0;
 }
 
@@ -250,7 +251,7 @@ int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_nam
     int res = 0;
     int i = 0;
     
-    res = __get_pwd_reg_files(file_names_out, &num_files)
+    res = __get_pwd_reg_files(file_names_out, &num_files);
     if(res == -1)
         return -1;
     
