@@ -17,6 +17,62 @@ char *itoa(int n, int out_size)
     return output;
 }
 
+/* generate oscar file header data from a file */
+int __create_oscar_hdr(int fd, struct oscar_hdr *hdr_out)
+{
+    struct stat st; 
+    char *file_size = NULL;
+    char *name_len = NULL;
+    char *adate = NULL;
+    char *mdate = NULL;
+    char *uid = NULL;
+    char *gid = NULL;
+    char *mode = NULL;
+    char deleted;
+    char sha1[OSCAR_SHA_DIGEST_LEN];
+    int res = 0;
+    int error = 0;
+
+    res = fstat(file_name, &st);
+    if(res == -1)
+    {
+        error = errno;
+        printf("Error fstat'ing file %s:%s", file_name, strerror(errno));
+        return -1;
+    }
+
+    file_size = itoa(st.st_size, OSCAR_FILE_SIZE+1);
+    name_len = itoa(strlen(file_name), 2+1);
+    adate = itoa(st.st_birthtime, OSCAR_DATE_SIZE);
+    mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
+    uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
+    gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
+    mode = itoa(st.st_mode, OSCAR_MODE_SIZE);
+
+
+    strcpy(hdr->oscar_name, file_name);
+    strncpy(hdr->oscar_name_len, name_len, 2);
+    strcpy(hdr->oscar_cdate, st.st_birthtime); //does st.st_birthtime exist?
+    strcpy(hdr->oscar_adate, st.);
+    strcpy(hdr->oscar_mdate, st.st_mtime);
+    strcpy(hdr->oscar_uid, uid); // st.st_uid user_id
+    strcpy(hdr->oscar_gid, gid); // st.st_gid group id
+    strcpy(hdr->oscar_mode, mode); // st.st_mode file mode
+    strcpy(hdr->oscar_size, file_size); 
+    hdr->oscar_deleted = ' ';
+    strcpy(hdr->oscar_hdr_end, OSCAR_HDR_END);
+
+    free(uid);
+    free(gid);
+    free(adate);
+    free(mdate);
+    free(mode);
+    free(file_size);
+    free(name_len);
+
+    return 0;
+}
+
 int __read_line(char **line_ptr, int *n, int fd)
 {
     //read out in increments of READ_BUFF_SIZE
@@ -261,6 +317,39 @@ int __write_file(int fd, const struct ArchiveFile *file)
     return 0;
 }
 
+int archive_contains_file(char *file_name, const struct Archive *archive)
+{
+    int fd = 0;
+    int i = 0;
+    int res = 0;
+    struct oscar_hdr hdr;
+    struct char *file_data;
+
+    fd = open(file_name, O_RDONLY, 0);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("attempt to open file '%s' failed: %s", file_name, strerror(error)); 
+        return -1;    
+    }
+    
+    res = __create_oscar_hdr(fd, &hdr);
+    if(res == -1)
+    {
+        return -1;    
+    }
+    
+    for(; i < archive->num_files; i++)
+    {
+        if(strcmp(hdr->oscar_name, file_name) == 0)
+            return 1;    
+    }
+
+    return -1;
+}
+
+
+
 int write_archive(char *file_name, const struct Archive *archive)
 {
     int fd = -1;
@@ -337,7 +426,7 @@ int open_archive(char *file_name, struct Archive **out_archive, int create)
             else
             {
                 printf("file %s doesn't exist and create != 1\n", file_name);
-                return -1;
+                return 1; // special return value 
             }
 		}
 	}
@@ -350,6 +439,19 @@ int open_archive(char *file_name, struct Archive **out_archive, int create)
 
     close(fd);
 	return 0;
+}
+
+void __archive_add_file(struct Archive *archive, struct ArchiveFile *archive_file)
+{
+    int placement_index = archive->num_files;
+
+    if(archive->num_files == archive->size_files)
+    {
+        if(__expand_archive(archive) == -1)
+            return -1;       
+    }
+
+    archive->files[placement_index] = *archive_file;
 }
 
 /* create and populate the fields of an ArchiveFile struct */
@@ -432,14 +534,27 @@ int __create_archive_file(char *file_name, struct ArchiveFile** out_archive_file
 int archive_add_files(struct Archive *archive, char **file_names, int num_files)
 {
     int num_files = 0;
-    struct ArchiveFile *files = NULL;
     int i = 0;
-    
+    int cmp = 0;
+    struct ArchiveFile *arc_file = NULL;
 
     files = malloc(sizeof(ArchiveFile) * num_files);
     for(; i < num_files; i++)
     {
-             
+        cmp = archive_contains_file(file_names[i], archive) == 1  
+        if(cmp == -1)
+            return -1;    
+        else if(cmp == 0)
+        {
+            res = __create_archive_file(file_names[i], &file, &arc_file);
+            if(res == -1)
+                return -1;
+
+            res = __archive_add_file(archive, arc_file);
+            if(res == -1)
+                return -1;
+        }
+      //else if(cmp == 1) print something in verbose mode here...
     }
 
     free(files);

@@ -91,7 +91,7 @@ int main(int argc, char **argv)
         {
             file_array[i] = cmd_args->files[i];
         }
-        
+         
         //add the values
         res = archive_add_files(archive, file_array, cmd_args->num_files -1); 
         free(file_array);
