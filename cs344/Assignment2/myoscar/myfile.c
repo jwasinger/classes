@@ -233,7 +233,8 @@ int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_o
 
     for(; i < num_files; i++)
     {
-        res = __load_file(&file_names_out[i], &((*files_data_out)[i]), (*sizes_out)[i]);
+    
+        res = __load_file((*file_names_out)[i], &((*files_data_out)[i]), (*sizes_out)[i]);
         if(res == -1)
         {
             __free_arrays(*(files_data_out), *(file_names_out), *sizes_out, i-1); 

@@ -32,25 +32,13 @@ int add_files(struct Archive *archive, char **files, int num_files)
     
 }
 
-void pwd_test(void)
-{
-    char **file_names = NULL;
-    int num_files = 0;
-    int i = 0;
-
-    get_pwd_files(&file_names, &num_files);
-
-    for(;i < num_files; i++)
-    {
-        printf("%s\n", file_names[i]);
-    }
-}
-
 int main(int argc, char **argv)
 {
     struct Archive *archive = NULL;
-    struct CMDArgs *cmd_args;
-    
+    struct CMDArgs *cmd_args = malloc(sizeof(struct CMDArgs));
+    int res = 0;
+    int i = 0;
+
     if(argc == 1)
     {
         printf("*** Archive file not specified\n");
@@ -77,7 +65,7 @@ int main(int argc, char **argv)
         printf("no files specified... exiting...\n");
         _Exit(-1);
     }
-    res = open_archive(cmd_args->files[0], &archive, 1);
+    res = open_archive(cmd_args->arc_file, &archive, 1);
     if(res == -1)
     {   
         _Exit(-1);
@@ -106,6 +94,6 @@ int main(int argc, char **argv)
         return 0;
     }
     free_archive(&archive);
-    free_CMDargs(&cmd_args);
+    free_CMDArgs(&cmd_args);
 	return 0;
 }

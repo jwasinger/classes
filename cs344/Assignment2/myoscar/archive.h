@@ -27,7 +27,7 @@ struct Archive
 };
 
 /* try and open the archive file 'file_name', create a new archive if the file doesn't exist and 'create'=1 */
-int open_archive(char *file_name, struct Archive *out_archive, int create);
+int open_archive(char *file_name, struct Archive **out_archive, int create);
 
 /* write out the archive to disk */
 int write_archive(char *file_name, const struct Archive *archive);

@@ -119,13 +119,28 @@ int proc_cmd_line_args(int argc, char **argv, struct CMDArgs *out_cmd_args)
         if(!out_cmd_args->files)
         {
             num_files = argc - (num_actions+2);
-
             out_cmd_args->files = malloc(sizeof(char*) * num_files);
-            out_cmd_args->files[files_write_pos] = malloc(sizeof(char) * strlen(argv[i]));
         }
+  
+        out_cmd_args->files[files_write_pos] = malloc(sizeof(char) * strlen(argv[i]));
+        strcpy(out_cmd_args->files[files_write_pos], argv[i]);
+        files_write_pos++;
     }
     
     out_cmd_args->actions = actions;
     out_cmd_args->num_files = num_files;
     return 0;
+}
+
+void free_CMDArgs(struct CMDArgs **cmd_args)
+{
+    int i = 0;
+    for(; i < (*cmd_args)->num_files; i++)
+    {
+        free((*cmd_args)->files[i]);
+    }
+
+    free((*cmd_args)->files);
+    free(*cmd_args);
+    *cmd_args = NULL;
 }
