@@ -19,7 +19,10 @@ void insert_spaces(char *str, int mem_size)
         if(end_reached)
             str[i] = 32;
         else if (str[i] == '\0')
+        {    
             end_reached = 1;
+            str[i] = 32;
+        }
     }
 }
 
@@ -27,7 +30,7 @@ void insert_spaces(char *str, int mem_size)
 char *itoa(int n, int out_size)
 {
     char *output = malloc(sizeof(char) * out_size);
-
+    
     sprintf(output, "%d", n);
     insert_spaces(output, out_size);
     return output;
@@ -58,8 +61,8 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
         return -1;
     }
 
-    file_size = itoa(st.st_size, OSCAR_FILE_SIZE+1);
-    name_len = itoa(strlen(file_name), 2+1);
+    file_size = itoa(st.st_size, OSCAR_FILE_SIZE);
+    name_len = itoa(strlen(file_name), 2);
     //adate = itoa(st.st_birthtime, OSCAR_DATE_SIZE);
     mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
     uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
@@ -599,9 +602,10 @@ int __populate_arc_file_struct(char *file_name, struct ArchiveFile** out_archive
     {
         return -1;
     }
-    
+     
     (*out_archive_file)->hdr = hdr;
-
+    (*out_archive_file)->file_size = atoi(hdr.oscar_size);
+    (*out_archive_file)->file_data = malloc(sizeof(char) * (*out_archive_file)->file_size);
     res = read(fd, (*out_archive_file)->file_data, (*out_archive_file)->file_size);
     if(res == -1)
     {
