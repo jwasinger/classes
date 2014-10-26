@@ -463,10 +463,11 @@ int archive_contains_file(char *file_name, const struct Archive *archive)
     
     for(; i < archive->num_files; i++)
     {
-        if(strcmp(hdr.oscar_name, file_name) == 0)
+        if(strstr(archive->files[i].hdr.oscar_name, file_name) != NULL)
             return 1;    
     }
-
+    
+    close(fd);
     return 0;
 }
 
