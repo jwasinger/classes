@@ -35,10 +35,13 @@ int write_archive(char *file_name, struct Archive *archive);
 
 void free_archive(struct Archive **archive);
 
-int archive_add_files(struct Archive *archive, struct CMDArgs *args);
+int archive_add_files(struct Archive *archive, char **files, int num_files);
 
 int archive_del_files(struct Archive *archive, char *file_names, int num_files); 
 
 int archive_add_reg_files(struct Archive *archive); //add all regular files in the pwd
 
+void disp_archive_toc(const struct Archive *archive);
+
+void disp_archive_long_toc(const struct Archive *archive);
 #endif

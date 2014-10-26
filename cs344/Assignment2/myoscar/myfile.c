@@ -110,7 +110,7 @@ int __get_pwd_files(char ***file_names, int *num_files)
     }
 }
 
-int __get_pwd_reg_files(char ***file_names, int *num_files)
+int get_pwd_reg_files(char ***file_names, int *num_files)
 {
     int file_names_cap = 2;
     int cur_num_files = 0;
@@ -218,57 +218,4 @@ int load_files(char **file_names, int num_files, char ***files_data, int **sizes
     return 0;
 }
 
-int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files_out)
-{
-    int num_files = 0;    
-    int res = 0;
-    int i = 0;
-    
-    res = __get_pwd_files(file_names_out, &num_files);
-    if(res == -1)
-        return -1;
-    
-    (*files_data_out) = malloc(sizeof(char *) * num_files);
-    (*sizes_out) = malloc(sizeof(int) * num_files);
 
-    for(; i < num_files; i++)
-    {
-    
-        res = __load_file((*file_names_out)[i], &((*files_data_out)[i]), (*sizes_out)[i]);
-        if(res == -1)
-        {
-            __free_arrays(*(files_data_out), *(file_names_out), *sizes_out, i-1); 
-            return -1;
-        }
-    }
-    
-    *num_files_out = num_files;
-    return 0;
-}
-
-int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files_out)
-{
-    int num_files = 0;    
-    int res = 0;
-    int i = 0;
-    
-    res = __get_pwd_reg_files(file_names_out, &num_files);
-    if(res == -1)
-        return -1;
-    
-    (*files_data_out) = malloc(sizeof(char *) * num_files);
-    (*sizes_out) = malloc(sizeof(int) * num_files);
-
-    for(; i < num_files; i++)
-    {
-        res = __load_file(&file_names_out[i], &((*files_data_out)[i]), (*sizes_out)[i]);
-        if(res == -1)
-        {
-            __free_arrays(*(files_data_out), *(file_names_out), *sizes_out, i-1); 
-            return -1;
-        }
-    }
-
-    *num_files_out = num_files;
-    return 0;
-}

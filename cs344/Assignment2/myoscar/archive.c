@@ -36,6 +36,14 @@ char *itoa(int n, int out_size)
     return output;
 }
 
+char *itoa_oct(int n, int out_size)
+{
+    char *output = malloc(sizeof(char) * out_size);
+
+    sprintf(output, "%o", n);
+    insert_spaces(output, out_size);
+    return output;
+}
 
 /* generate oscar file header data from a file */
 int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
@@ -67,7 +75,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
     uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
     gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
-    mode = itoa(st.st_mode, OSCAR_MODE_SIZE);
+    mode = itoa_oct(st.st_mode, OSCAR_MODE_SIZE);
     
     strcpy(hdr_out->oscar_name, file_name);
     strncpy(hdr_out->oscar_name_len, name_len, 2);
@@ -83,7 +91,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     strcpy(hdr_out->oscar_hdr_end, OSCAR_HDR_END);
     
     insert_spaces(hdr_out->oscar_name, OSCAR_MAX_FILE_NAME_LEN); 
-    
+
     free(uid);
     free(gid);
     free(adate);
@@ -620,21 +628,21 @@ int __populate_arc_file_struct(char *file_name, struct ArchiveFile** out_archive
     return 0;
 }
 
-int archive_add_files(struct Archive *archive, struct CMDArgs *args)
+int archive_add_files(struct Archive *archive, char **files, int num_files)
 {
     int i = 0;
     int cmp = 0;
     int res = 0;
     struct ArchiveFile *arc_file = NULL;
 
-    for(; i < args->num_files; i++)
+    for(; i < num_files; i++)
     {
-        cmp = archive_contains_file(args->files[i], archive); 
+        cmp = archive_contains_file(files[i], archive); 
         if(cmp == -1)
             return -1;    
         else if(cmp == 0)
         {
-            res = __populate_arc_file_struct(args->files[i], &arc_file);
+            res = __populate_arc_file_struct(files[i], &arc_file);
             if(res == -1)
                 return -1;
 
@@ -645,7 +653,7 @@ int archive_add_files(struct Archive *archive, struct CMDArgs *args)
         //else if(cmp == 1) print something in verbose mode here...
     }
 
-    res = write_archive(args->arc_file, archive);
+    res = write_archive(archive->archive_name, archive);
     if(res == -1)
     {
         return -1;

@@ -27,6 +27,16 @@ int print_verbose(char *str)
 	return 0;
 }
 
+void print_toc(void)
+{
+    
+}
+
+void print_long_toc(void)
+{
+    
+}
+
 int add_files(struct Archive *archive, char **files, int num_files)
 {
     
@@ -76,7 +86,7 @@ int main(int argc, char **argv)
         //create an array containing all the files that need to be added
          
         //add the values
-        res = archive_add_files(archive, cmd_args); 
+        res = archive_add_files(archive, cmd_args->files, cmd_args->num_files); 
         if(res==-1)
             return -1;
 
@@ -84,9 +94,33 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_ADD_ALL)
     {
+        char **file_names;
+        int num_files;
+        res = get_pwd_reg_files(&file_names, &num_files);
+        if(res == -1)
+        {
+            return -1; 
+        }
+    
+        res = archive_add_files(archive, file_names, num_files);
+        if(res == -1)
+        {
+            free(file_names);
+            return -1;
+        }
 
+        free(file_names);
         return 0;
     }
+    else if (cmd_args->actions & ACTION_TOC)
+    {
+        
+    }
+    else if (cmd_args->actions & ACTION_LONG_TOC)
+    {
+        
+    }
+
     free_archive(&archive);
     free_CMDArgs(&cmd_args);
 	return 0;
