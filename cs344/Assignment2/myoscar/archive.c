@@ -9,13 +9,30 @@
 
 #define READ_BUFF_SIZE 128
 
+void insert_spaces(char *str, int mem_size)
+{
+    int i = 0;
+    int end_reached = 0;
+
+    for(; i<mem_size; i++)
+    {
+        if(end_reached)
+            str[i] = 32;
+        else if (str[i] == '\0')
+            end_reached = 1;
+    }
+}
+
 /* http://stackoverflow.com/questions/1114741/how-to-convert-int-to-char-c */
 char *itoa(int n, int out_size)
 {
     char *output = malloc(sizeof(char) * out_size);
+
     sprintf(output, "%d", n);
+    insert_spaces(output, out_size);
     return output;
 }
+
 
 /* generate oscar file header data from a file */
 int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
@@ -48,20 +65,22 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
     gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
     mode = itoa(st.st_mode, OSCAR_MODE_SIZE);
-
-
+    
     strcpy(hdr_out->oscar_name, file_name);
     strncpy(hdr_out->oscar_name_len, name_len, 2);
-    //strcpy(hdr->oscar_cdate, st.st_birthtime); //does st.st_birthtime exist?
-    //strcpy(hdr->oscar_adate, st.);
-    strcpy(hdr_out->oscar_mdate, mdate);
-    strcpy(hdr_out->oscar_uid, uid); // st.st_uid user_id
-    strcpy(hdr_out->oscar_gid, gid); // st.st_gid group id
-    strcpy(hdr_out->oscar_mode, mode); // st.st_mode file mode
-    strcpy(hdr_out->oscar_size, file_size); 
+    strncpy(hdr_out->oscar_cdate, mdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
+    strncpy(hdr_out->oscar_adate, mdate, OSCAR_DATE_SIZE); // THIS IS INCORRECT
+    strncpy(hdr_out->oscar_mdate, mdate, OSCAR_DATE_SIZE);
+    strncpy(hdr_out->oscar_uid, uid, OSCAR_UGID_SIZE); // st.st_uid user_id
+    strncpy(hdr_out->oscar_gid, gid, OSCAR_UGID_SIZE); // st.st_gid group id
+    strncpy(hdr_out->oscar_mode, mode, OSCAR_MODE_SIZE); // st.st_mode file mode
+    strncpy(hdr_out->oscar_size, file_size, OSCAR_FILE_SIZE); 
     hdr_out->oscar_deleted = ' ';
+    strcpy(hdr_out->oscar_sha1,"          ");
     strcpy(hdr_out->oscar_hdr_end, OSCAR_HDR_END);
-
+    
+    insert_spaces(hdr_out->oscar_name, OSCAR_MAX_FILE_NAME_LEN); 
+    
     free(uid);
     free(gid);
     free(adate);
@@ -292,17 +311,120 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
     return 0;
 }
 
+int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
+{
+    int res = -1;
+    int error = 0;
+
+    res = write(fd, hdr->oscar_name, OSCAR_MAX_FILE_NAME_LEN);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_name: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_name_len, 2);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_name_len: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_cdate, OSCAR_DATE_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_cdate: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_adate, OSCAR_DATE_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_adate: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_mdate, OSCAR_DATE_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_mdate: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_uid, OSCAR_UGID_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_uid: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_gid, OSCAR_UGID_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_gid: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_mode, OSCAR_MODE_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_mode: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_size, OSCAR_FILE_SIZE);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_size: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, &(hdr->oscar_deleted), 1);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_deleted: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_sha1, OSCAR_SHA_DIGEST_LEN);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_sha1: %s", strerror(error));
+        return -1;
+    }
+
+    res = write(fd, hdr->oscar_hdr_end, OSCAR_HDR_END_LEN);
+    if(res == -1)
+    {
+        error = errno;    
+        printf("error writing oscar_hdr_end: %s", strerror(error));
+        return -1;
+    }
+
+    return 0;
+}
+
 int __write_file(int fd, const struct ArchiveFile *file)
 {
     int res = -1;
 
-    res = write(fd, (void *)&(file->hdr), OSCAR_HDR_SIZE);
-    if(res != OSCAR_HDR_SIZE)
+    res = __write_oscar_hdr(fd, &file->hdr); 
+    if(res == -1)
     {
-        printf("less bytes written than expected while writing file header\n");
         return -1;
     }
-    
+
     res = write(fd, (void *)file->file_data, file->file_size);
     if(res != file->file_size)
     {
@@ -342,12 +464,12 @@ int archive_contains_file(char *file_name, const struct Archive *archive)
             return 1;    
     }
 
-    return -1;
+    return 0;
 }
 
 
 
-int write_archive(char *file_name, const struct Archive *archive)
+int write_archive(char *file_name, struct Archive *archive)
 {
     int fd = -1;
     int res = -1;
@@ -451,6 +573,7 @@ int __archive_add_file(struct Archive *archive, struct ArchiveFile *archive_file
     }
 
     archive->files[placement_index] = *archive_file;
+    archive->num_files++;
 }
 
 /* create and populate the fields of an ArchiveFile struct */
@@ -476,34 +599,37 @@ int __populate_arc_file_struct(char *file_name, struct ArchiveFile** out_archive
     {
         return -1;
     }
+    
+    (*out_archive_file)->hdr = hdr;
 
-    //write the header to the disk
-    res = write(fd, (void *)&hdr, sizeof(struct oscar_hdr));
+    res = read(fd, (*out_archive_file)->file_data, (*out_archive_file)->file_size);
     if(res == -1)
     {
         error = errno;
-        printf("Error writing oscar header to %s: %s\n", file_name, strerror(error));
+        printf("failed to read file '%s': %s\n", file_name, strerror(errno));
+        close(fd);
         return -1;
     }
 
-    return fd;
+    close(fd);
+    return 0;
 }
 
-int archive_add_files(struct Archive *archive, char **file_names, int num_files)
+int archive_add_files(struct Archive *archive, struct CMDArgs *args)
 {
     int i = 0;
     int cmp = 0;
     int res = 0;
     struct ArchiveFile *arc_file = NULL;
 
-    for(; i < num_files; i++)
+    for(; i < args->num_files; i++)
     {
-        cmp = archive_contains_file(file_names[i], archive); 
+        cmp = archive_contains_file(args->files[i], archive); 
         if(cmp == -1)
             return -1;    
         else if(cmp == 0)
         {
-            res = __populate_arc_file_struct(file_names[i], &arc_file);
+            res = __populate_arc_file_struct(args->files[i], &arc_file);
             if(res == -1)
                 return -1;
 
@@ -512,6 +638,12 @@ int archive_add_files(struct Archive *archive, char **file_names, int num_files)
                 return -1;
         }
         //else if(cmp == 1) print something in verbose mode here...
+    }
+
+    res = write_archive(args->arc_file, archive);
+    if(res == -1)
+    {
+        return -1;
     }
 }
 

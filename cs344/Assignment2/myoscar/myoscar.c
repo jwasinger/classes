@@ -74,15 +74,9 @@ int main(int argc, char **argv)
     if (cmd_args->actions & ACTION_ADD_MEMBERS)
     {
         //create an array containing all the files that need to be added
-        char **file_array = malloc(sizeof(char *)*cmd_args->num_files - 1);
-        for(i = 1; i < cmd_args->num_files; i++)
-        {
-            file_array[i] = cmd_args->files[i];
-        }
          
         //add the values
-        res = archive_add_files(archive, file_array, cmd_args->num_files -1); 
-        free(file_array);
+        res = archive_add_files(archive, cmd_args); 
         if(res==-1)
             return -1;
 

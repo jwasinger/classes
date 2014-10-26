@@ -10,6 +10,7 @@
 
 #include "oscar.h"
 #include "myfile.h"
+#include "cmd_line_args.h"
 
 struct ArchiveFile
 {
@@ -30,11 +31,11 @@ struct Archive
 int open_archive(char *file_name, struct Archive **out_archive, int create);
 
 /* write out the archive to disk */
-int write_archive(char *file_name, const struct Archive *archive);
+int write_archive(char *file_name, struct Archive *archive);
 
 void free_archive(struct Archive **archive);
 
-int archive_add_files(struct Archive *archive, char **file_names, int num_files);
+int archive_add_files(struct Archive *archive, struct CMDArgs *args);
 
 int archive_del_files(struct Archive *archive, char *file_names, int num_files); 
 
