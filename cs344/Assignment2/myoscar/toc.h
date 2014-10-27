@@ -3,7 +3,9 @@
 
 #include <grp.h>
 #include <pwd.h>
+#include <time.h>
 
+#include "oscar.h"
 #include "archive.h"
 
 void disp_archive_toc(struct Archive *archive);
