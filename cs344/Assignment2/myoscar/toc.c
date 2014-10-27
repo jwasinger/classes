@@ -140,7 +140,16 @@ int get_usr_name(int uid, char **output)
 
 void disp_archive_toc(struct Archive *archive)
 {
-     
+    int i = 0;
+    char file_name[OSCAR_MAX_FILE_NAME_LEN+1]; 
+    printf("Short table of contents for oscar archive file: %s\n", archive->archive_name);
+
+    for(i = 0; i < archive->num_files; i++)
+    {
+        strncpy(file_name, archive->files[i].hdr.oscar_name, OSCAR_MAX_FILE_NAME_LEN);
+        file_name[OSCAR_MAX_FILE_NAME_LEN] = '\0';
+        printf("  %s\n", file_name);
+    }
 }
 
 void disp_archive_long_toc(struct Archive *archive)
@@ -203,7 +212,7 @@ void disp_archive_long_toc(struct Archive *archive)
         deleted = (archive->files[i].hdr.oscar_deleted == 'y')? "yes" : "no"; 
         
         strcpy(oscar_size, archive->files[i].hdr.oscar_size);
-        for(j = 0; j < OSCAR_MAX_FILE_NAME_LEN; j++)
+        for(j = 0; j < OSCAR_FILE_SIZE; j++)
         {
             if(oscar_size[j] == 32)
             {
