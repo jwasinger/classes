@@ -92,10 +92,22 @@ char *__get_time(time_t t)
 {
     time_t t2 = time(NULL);
 
-    struct tm *now = gmtime(&t2);
+    struct tm *now = NULL;
+    gmtime_r(&t2, now);
+    
     char *output = malloc(sizeof(char) * 32);
     strftime(output, 32, "%a %b %d %k:%M:%S %Y", now);
     return output;
+}
+
+char *get_gr_name(int gid)
+{
+    
+}
+
+char *get_usr_name(int uid)
+{
+    
 }
 
 void disp_archive_toc(struct Archive *archive)
@@ -135,7 +147,7 @@ void disp_archive_long_toc(struct Archive *archive)
 
         grp_name = getgrgid((gid_t)gid)->gr_name;
         owner_name = getpwuid(uid)->pw_name;
-        
+        if(getgrgid((gid)gid,  
         adate = atoi(archive->files[i].hdr.oscar_adate);
         mdate = atoi(archive->files[i].hdr.oscar_mdate);
 
