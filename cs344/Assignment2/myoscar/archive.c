@@ -487,8 +487,6 @@ int archive_contains_file(char *file_name, const struct Archive *archive, int *o
     return 0;
 }
 
-
-
 int write_archive(char *file_name, struct Archive *archive)
 {
     int fd = -1;
