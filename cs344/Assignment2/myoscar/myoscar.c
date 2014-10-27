@@ -28,11 +28,6 @@ int print_verbose(char *str)
 	return 0;
 }
 
-int add_files(struct Archive *archive, char **files, int num_files)
-{
-    
-}
-
 int main(int argc, char **argv)
 {
     struct Archive *archive = NULL;
@@ -162,7 +157,24 @@ int main(int argc, char **argv)
         }
         return 0;
     }
-    
+    if(cmd_args->actions & ACTION_DELETE)
+    {
+        if(cmd_args->num_files == 0)
+        {
+            printf("no files specified to extract... exiting...\n");
+            return -1;
+        }
+        else if(!cmd_args->has_arc_file)
+        {
+            printf("no archive file specified... exiting...\n");
+            return -1;
+        }
+
+        res = archive_delete_member(cmd_args->files[0], archive);
+        if(res == -1)
+            return -1;
+    }
+
     free_archive(&archive);
     free_CMDArgs(&cmd_args);
 	return 0;

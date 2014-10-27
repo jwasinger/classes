@@ -211,6 +211,12 @@ int __expand_archive(struct Archive *archive)
     return 0;
 }
 
+void __free_archive_file(struct ArchiveFile *arc_file)
+{
+    free(arc_file->file_data);
+    free(arc_file);
+}
+
 void free_archive(struct Archive **archive)
 {
     int i = 0;
@@ -761,5 +767,39 @@ int archive_extract_member_cur_time(char *file_name, const struct Archive *archi
         printf("failed to modify file dates\n");
         return -1;
     }
+    return 0;
+}
+
+int __archive_delete_index(int index, struct Archive *archive)
+{
+    int i = 0;
+
+    __free_archive_file(&(archive->files[index]));
+    memcpy(&(archive->files[index]), &(archive->files[index+1]), sizeof(struct ArchiveFile) * (archive->num_files - (index + 1)));
+
+    return 0;
+}
+
+int archive_delete_member(char *file_name, struct Archive *archive)
+{
+    int res = 0;
+    int file_index = 0;
+
+    res = archive_contains_file(file_name, archive, &file_index);
+    if(res == -1)
+    {
+        return -1;
+    }
+    else if (res == 0)
+    {
+        printf("file '%s' is not a member of archive '%s'\n", file_name, archive->archive_name);
+        return -1;
+    }
+    
+    __archive_delete_index(file_index, archive);
+    
+    res = write_archive(archive->archive_name, archive);
+    if(res == -1)
+        return -1;
     return 0;
 }

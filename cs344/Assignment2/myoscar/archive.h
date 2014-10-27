@@ -17,7 +17,7 @@
 struct ArchiveFile
 {
     struct oscar_hdr hdr;
-    char *file_data;
+    char *file_data; //is this member ever deleted when a free(ArchiveFile) call is made?
     int file_size;
 };
 
@@ -52,4 +52,6 @@ int archive_contains_file(char *file_name, const struct Archive *archive, int *o
 int archive_extract_member(char *file_name, const struct Archive *archive);
 
 int archive_extract_member_cur_time(char *file_name, const struct Archive *archive);
+
+int archive_delete_member(char *file_name, struct Archive *archive);
 #endif
