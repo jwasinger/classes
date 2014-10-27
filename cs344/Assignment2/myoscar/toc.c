@@ -100,14 +100,42 @@ char *__get_time(time_t t)
     return output;
 }
 
-char *get_gr_name(int gid)
+int get_gr_name(int gid, char **output)
 {
+    struct group grp;
+    struct group *grp_ptr = &grp;
+    struct group *tmp_grp_ptr = NULL;
+    char buffer[256];
+    size_t buf_size = 256;
+    int error = 0;
+
+    if((getgrgid_r(gid, grp_ptr, buffer, buf_size, &tmp_grp_ptr)) != NULL)
+    {
+        error = errno;
+        printf("Errror getting group with gid(%d): %s\n", gid, error);
+        return -1;
+    }
     
+    (*output) = malloc(sizeof(char) * 64);
+    strcpy((*output), grp.gr_name);
+    return 0;
 }
 
-char *get_usr_name(int uid)
+int get_usr_name(int uid, char **output)
 {
+    struct passwd pwd;
+    struct passwd *pwd_ptr = &pwd;
+    struct passwd *result = NULL;
+    char buf[256];
+    size_t bufsize = 256;
+
+    getpwuid_r(uid, pwd_ptr, buf, bufsize, &result);
+    if(result == NULL)
+        return -1;
     
+    (*output) = malloc(sizeof(char) * 64);
+    strcpy((*output), result->pw_name);
+    return 0;
 }
 
 void disp_archive_toc(struct Archive *archive)
@@ -118,6 +146,7 @@ void disp_archive_toc(struct Archive *archive)
 void disp_archive_long_toc(struct Archive *archive)
 {
     int i = 0;
+    int res = 0;
     char *perms = NULL;
     char perms_num[5];
     char *owner_name = NULL;
@@ -145,9 +174,21 @@ void disp_archive_long_toc(struct Archive *archive)
         uid = atoi(archive->files[i].hdr.oscar_gid);
         gid = atoi(archive->files[i].hdr.oscar_uid);
 
-        grp_name = getgrgid((gid_t)gid)->gr_name;
-        owner_name = getpwuid(uid)->pw_name;
-        if(getgrgid((gid)gid,  
+        res = get_gr_name(gid, &grp_name);
+        if(res == -1)
+        {
+            printf("ERROR(1)");
+            return;
+        }
+        res = get_usr_name(uid, &owner_name);
+        if(res == -1)
+        {
+            printf("ERROR(2)");
+            return;
+        }
+        
+        //owner_name = getpwuid(uid)->pw_name;
+        
         adate = atoi(archive->files[i].hdr.oscar_adate);
         mdate = atoi(archive->files[i].hdr.oscar_mdate);
 
@@ -168,5 +209,7 @@ void disp_archive_long_toc(struct Archive *archive)
         free(perms);
         free(access_date);
         free(modify_date);
+        free(grp_name);
+        free(owner_name);
     }
 }
