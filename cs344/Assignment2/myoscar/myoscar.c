@@ -117,7 +117,14 @@ int main(int argc, char **argv)
     {
        disp_archive_long_toc(archive);         
     }
-
+    else if (cmd_args->actions & ACTION_EXTRACT)
+    {
+        
+    }
+    else if (cmd_args->actions & ACTION_EXTRACT_CURR_TIME)
+    {
+        
+    }
     free_archive(&archive);
     free_CMDArgs(&cmd_args);
 	return 0;

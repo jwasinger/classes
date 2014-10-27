@@ -670,3 +670,13 @@ int archive_add_reg_files(struct Archive *archive)
 {
     
 }
+
+int archive_extract_member(char *file_name)
+{
+    
+}
+
+int archive_extract_member_cur_time(char *file_name)
+{
+    
+}
