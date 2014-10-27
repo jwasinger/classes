@@ -467,36 +467,23 @@ int __write_file(int fd, const struct ArchiveFile *file)
     return 0;
 }
 
-int archive_contains_file(char *file_name, const struct Archive *archive)
+int archive_contains_file(char *file_name, const struct Archive *archive, int *out_index)
 {
-    int fd = 0;
     int i = 0;
     int res = 0;
     struct oscar_hdr hdr;
     char *file_data;
     int error = 0;
-
-    fd = open(file_name, O_RDONLY, 0);
-    if(fd == -1)
-    {
-        error = errno;
-        printf("attempt to open file '%s' failed: %s\n", file_name, strerror(error)); 
-        return -1;    
-    }
-    
-    res = __create_oscar_hdr(fd, file_name, &hdr);
-    if(res == -1)
-    {
-        return -1;    
-    }
     
     for(; i < archive->num_files; i++)
     {
         if(strstr(archive->files[i].hdr.oscar_name, file_name) != NULL)
-            return i;    
+        {    
+            (*out_index) = i;
+            return 1;    
+        }
     }
     
-    close(fd);
     return 0;
 }
 
@@ -655,10 +642,11 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
     int cmp = 0;
     int res = 0;
     struct ArchiveFile *arc_file = NULL;
+    int out_index = 0; 
 
     for(; i < num_files; i++)
     {
-        cmp = archive_contains_file(files[i], archive); 
+        cmp = archive_contains_file(files[i], archive, &out_index); 
         if(cmp == -1)
             return -1;    
         else if(cmp == 0)
@@ -698,8 +686,9 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
     int error = 0;
     int fd = 0;
     int i = 0;
-    
-    if(!archive_contains_file(file_name, archive))
+    int out_index;
+
+    if(!archive_contains_file(file_name, archive, &out_index))
     {
         printf("archive %s doesn't contain file %s\n", archive->archive_name, file_name);
         return -1;
@@ -755,10 +744,11 @@ int archive_extract_member_cur_time(char *file_name, const struct Archive *archi
     int res = 0;
     int file_index = 0;
 
-    file_index = archive_contains_file(file_name, archive);
-    if(file_index <= 0)
+    res = archive_contains_file(file_name, archive, &file_index);
+    if(res <= 0)
     {
         printf("file is not a part of archive.");    
+        return -1;
     }
 
     if(archive_extract_member(file_name, archive) == -1)
