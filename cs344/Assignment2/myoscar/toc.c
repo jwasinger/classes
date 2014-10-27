@@ -92,7 +92,7 @@ char *__get_time(time_t *t)
 {
 
     struct tm now;
-    gmtime_r(&t, &now);
+    localtime_r(t, &now);
     
     char *output = malloc(sizeof(char) * 32);
     strftime(output, 32, "%a %b %d %k:%M:%S %Y", &now);
@@ -171,9 +171,9 @@ void disp_archive_long_toc(struct Archive *archive)
 
     int gid = 0;
     int uid = 0;
-    int adate = 0;
-    int mdate = 0;
-    int cdate = 0;
+    long int adate = 0;
+    long int mdate = 0;
+    long int cdate = 0;
 
     printf("Long table of contents for oscar archive file: %s\n", archive->archive_name);
     
@@ -189,7 +189,7 @@ void disp_archive_long_toc(struct Archive *archive)
         
         uid = atoi(archive->files[i].hdr.oscar_uid);
         gid = atoi(archive->files[i].hdr.oscar_gid);
-
+        
         res = get_gr_name(gid, &grp_name);
         if(grp_name == NULL)
         {
@@ -205,17 +205,17 @@ void disp_archive_long_toc(struct Archive *archive)
         
         //owner_name = getpwuid(uid)->pw_name;
         
-        adate = atoi(archive->files[i].hdr.oscar_adate);
-        mdate = atoi(archive->files[i].hdr.oscar_mdate);
-        //cdate = atoi(archive->files[i].hdr.oscar_cdate);
+        adate = atol(archive->files[i].hdr.oscar_adate);
+        mdate = atol(archive->files[i].hdr.oscar_mdate);
+        cdate = atol(archive->files[i].hdr.oscar_cdate);
 
         access_date = __get_time(&adate);
         modify_date = __get_time(&mdate);
-        //create_date = __get_time(&cdate);
-
+        create_date = __get_time(&cdate);
+        
         deleted = (archive->files[i].hdr.oscar_deleted == 'y')? "yes" : "no"; 
         
-        strcpy(oscar_size, archive->files[i].hdr.oscar_size);
+        strncpy(oscar_size, archive->files[i].hdr.oscar_size, OSCAR_FILE_SIZE);
         for(j = 0; j < OSCAR_FILE_SIZE; j++)
         {
             if(oscar_size[j] == 32)
@@ -224,13 +224,13 @@ void disp_archive_long_toc(struct Archive *archive)
                 break;
             }
         }
-         
+        
         printf("  File name: %.*s\n", OSCAR_MAX_FILE_NAME_LEN, archive->files[i].hdr.oscar_name);
         printf("         File size:   %s bytes\n", oscar_size);
         printf("         Permissions: %s (%s)\n", perms, perms_num);
         printf("         File owner:  %s (uid: %d)\n", owner_name, uid);
         printf("         File group:  %s (gid: %d)\n", grp_name, gid);
-        //printf("         Create date: %s\n", create_date);
+        printf("         Create date: %s\n", create_date);
         printf("         Access date: %s\n", access_date);
         printf("         Modify date: %s\n", modify_date);
         printf("         Marked deleted: %s\n", deleted);
@@ -238,7 +238,7 @@ void disp_archive_long_toc(struct Archive *archive)
         free(perms);
         free(access_date);
         free(modify_date);
-        //free(create_date);
+        free(create_date);
         free(grp_name);
         free(owner_name);
     }

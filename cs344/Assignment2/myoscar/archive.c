@@ -36,6 +36,24 @@ char *itoa(int n, int out_size)
     return output;
 }
 
+char *ltoa(long int n, int out_size)
+{
+    char *output = malloc(sizeof(char) * out_size);
+    
+    sprintf(output, "%d", n);
+    insert_spaces(output, out_size);
+    return output;
+}
+
+char *lltoa(long long int n, int out_size)
+{
+    char *output = malloc(sizeof(char) * out_size);
+    
+    sprintf(output, "%d", n);
+    insert_spaces(output, out_size);
+    return output;   
+}
+
 char *itoa_oct(int n, int out_size)
 {
     char *output = malloc(sizeof(char) * out_size);
@@ -70,18 +88,18 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
         return -1;
     }
 
-    file_size = itoa(st.st_size, OSCAR_FILE_SIZE);
+    file_size = lltoa(st.st_size, OSCAR_FILE_SIZE);
     name_len = itoa(strlen(file_name), 2);
-    adate = itoa(st.st_atime, OSCAR_DATE_SIZE);
-    mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
-    //cdate = itoa(st.st_ctime, OSCAR_DATE_SIZE);
+    adate = ltoa(st.st_atime, OSCAR_DATE_SIZE);
+    mdate = ltoa(st.st_mtime, OSCAR_DATE_SIZE);
+    cdate = ltoa(st.st_ctime, OSCAR_DATE_SIZE);
     uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
     gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
     mode = itoa_oct(st.st_mode, OSCAR_MODE_SIZE);
     
     strcpy(hdr_out->oscar_name, file_name);
     strncpy(hdr_out->oscar_name_len, name_len, 2);
-    //strncpy(hdr_out->oscar_cdate, cdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
+    strncpy(hdr_out->oscar_cdate, cdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
     strncpy(hdr_out->oscar_adate, adate, OSCAR_DATE_SIZE); // THIS IS INCORRECT
     strncpy(hdr_out->oscar_mdate, mdate, OSCAR_DATE_SIZE);
     strncpy(hdr_out->oscar_uid, uid, OSCAR_UGID_SIZE); // st.st_uid user_id
@@ -98,7 +116,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     free(gid);
     free(adate);
     free(mdate);
-    //free(cdate);
+    free(cdate);
     free(mode);
     free(file_size);
     free(name_len);
