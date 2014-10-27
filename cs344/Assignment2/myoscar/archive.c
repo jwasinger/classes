@@ -53,6 +53,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     char *name_len = NULL;
     char *adate = NULL;
     char *mdate = NULL;
+    char *cdate = NULL;
     char *uid = NULL;
     char *gid = NULL;
     char *mode = NULL;
@@ -71,16 +72,17 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
 
     file_size = itoa(st.st_size, OSCAR_FILE_SIZE);
     name_len = itoa(strlen(file_name), 2);
-    //adate = itoa(st.st_birthtime, OSCAR_DATE_SIZE);
+    adate = itoa(st.st_atime, OSCAR_DATE_SIZE);
     mdate = itoa(st.st_mtime, OSCAR_DATE_SIZE);
+    //cdate = itoa(st.st_ctime, OSCAR_DATE_SIZE);
     uid = itoa(st.st_uid, OSCAR_UGID_SIZE);
     gid = itoa(st.st_gid, OSCAR_UGID_SIZE);
     mode = itoa_oct(st.st_mode, OSCAR_MODE_SIZE);
     
     strcpy(hdr_out->oscar_name, file_name);
     strncpy(hdr_out->oscar_name_len, name_len, 2);
-    strncpy(hdr_out->oscar_cdate, mdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
-    strncpy(hdr_out->oscar_adate, mdate, OSCAR_DATE_SIZE); // THIS IS INCORRECT
+    //strncpy(hdr_out->oscar_cdate, cdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
+    strncpy(hdr_out->oscar_adate, adate, OSCAR_DATE_SIZE); // THIS IS INCORRECT
     strncpy(hdr_out->oscar_mdate, mdate, OSCAR_DATE_SIZE);
     strncpy(hdr_out->oscar_uid, uid, OSCAR_UGID_SIZE); // st.st_uid user_id
     strncpy(hdr_out->oscar_gid, gid, OSCAR_UGID_SIZE); // st.st_gid group id
@@ -96,6 +98,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     free(gid);
     free(adate);
     free(mdate);
+    //free(cdate);
     free(mode);
     free(file_size);
     free(name_len);
@@ -671,20 +674,52 @@ int archive_add_reg_files(struct Archive *archive)
     
 }
 
-int archive_extract_member(char *file_name)
+int archive_extract_member(char *file_name, const struct Archive *archive)
 {
     int res = 0;
     int error = 0;
-    
+    int fd = 0;
+    int i = 0;
+
     res = open(file_name, O_RDONLY, 0);
     if(res == -1)
     {
-        if(errno == ENOENT)
+        if(errno != ENOENT)
         {
-            
+            error = errno;
+            printf("File extraction error: %s\n", strerror(error));
+            return -1;
         }
     }
+    else
+    {
+        return 1; //file with same name as the one that was supposed to be extracted already exists
+    }
+
     res = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
+    if(res == -1)
+    {
+        error = errno;
+        printf("File extraction error: %s\n", strerror(error));
+        return -1;
+    }
+    
+    fd = res;
+    
+    for(i = 0; i < archive->num_files; i++)
+    {
+        if(strstr(archive->files[i].hdr.oscar_name, file_name) != NULL)
+        {
+            res = write(fd, archive->files[i].file_data, archive->files[i].file_size); 
+            if(res < archive->files[i].file_size)
+            {
+                error = errno;
+                printf("Error writing file extraction output to file %s: %s", file_name, strerror(error));
+                return -1;
+            }
+            return 0;
+        }
+    }
 }
 
 int archive_extract_member_cur_time(char *file_name)

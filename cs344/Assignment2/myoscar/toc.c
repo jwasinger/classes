@@ -173,6 +173,7 @@ void disp_archive_long_toc(struct Archive *archive)
     int uid = 0;
     int adate = 0;
     int mdate = 0;
+    int cdate = 0;
 
     printf("Long table of contents for oscar archive file: %s\n", archive->archive_name);
     
@@ -206,9 +207,12 @@ void disp_archive_long_toc(struct Archive *archive)
         
         adate = atoi(archive->files[i].hdr.oscar_adate);
         mdate = atoi(archive->files[i].hdr.oscar_mdate);
+        //cdate = atoi(archive->files[i].hdr.oscar_cdate);
 
         access_date = __get_time(&adate);
         modify_date = __get_time(&mdate);
+        //create_date = __get_time(&cdate);
+
         deleted = (archive->files[i].hdr.oscar_deleted == 'y')? "yes" : "no"; 
         
         strcpy(oscar_size, archive->files[i].hdr.oscar_size);
@@ -234,6 +238,7 @@ void disp_archive_long_toc(struct Archive *archive)
         free(perms);
         free(access_date);
         free(modify_date);
+        //free(create_date);
         free(grp_name);
         free(owner_name);
     }

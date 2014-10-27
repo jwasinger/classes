@@ -115,11 +115,15 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_LONG_TOC)
     {
-       disp_archive_long_toc(archive);         
+        disp_archive_long_toc(archive);         
     }
     else if (cmd_args->actions & ACTION_EXTRACT)
     {
-        
+        res = archive_extract_member(cmd_args->files[0], archive);
+        if(res == -1)
+        {
+            return -1;    
+        }
     }
     else if (cmd_args->actions & ACTION_EXTRACT_CURR_TIME)
     {
