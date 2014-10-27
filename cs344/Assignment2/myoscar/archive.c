@@ -673,7 +673,18 @@ int archive_add_reg_files(struct Archive *archive)
 
 int archive_extract_member(char *file_name)
 {
+    int res = 0;
+    int error = 0;
     
+    res = open(file_name, O_RDONLY, 0);
+    if(res == -1)
+    {
+        if(errno == ENOENT)
+        {
+            
+        }
+    }
+    res = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
 }
 
 int archive_extract_member_cur_time(char *file_name)
