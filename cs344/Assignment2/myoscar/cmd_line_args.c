@@ -112,6 +112,7 @@ int proc_cmd_line_args(int argc, char **argv, struct CMDArgs *out_cmd_args)
         {
             strcpy(out_cmd_args->arc_file, argv[i]);
             has_arc_file = 1;
+            out_cmd_args->has_arc_file = 1;
             continue;
         }
     

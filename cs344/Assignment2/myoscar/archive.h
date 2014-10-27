@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <utime.h>
 
 #include "oscar.h"
 #include "myfile.h"
@@ -49,5 +51,5 @@ int archive_contains_file(char *file_name, const struct Archive *archive);
 
 int archive_extract_member(char *file_name, const struct Archive *archive);
 
-int archive_extract_member_cur_time(char *file_name);
+int archive_extract_member_cur_time(char *file_name, const struct Archive *archive);
 #endif

@@ -26,7 +26,8 @@
 struct CMDArgs
 {
     char arc_file[OSCAR_MAX_FILE_NAME_LEN];
-  
+    int has_arc_file;
+    
     char **files;
     int num_files;
     int actions;

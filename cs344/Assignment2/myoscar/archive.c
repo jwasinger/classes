@@ -493,7 +493,7 @@ int archive_contains_file(char *file_name, const struct Archive *archive)
     for(; i < archive->num_files; i++)
     {
         if(strstr(archive->files[i].hdr.oscar_name, file_name) != NULL)
-            return 1;    
+            return i;    
     }
     
     close(fd);
@@ -698,6 +698,12 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
     int error = 0;
     int fd = 0;
     int i = 0;
+    
+    if(!archive_contains_file(file_name, archive))
+    {
+        printf("archive %s doesn't contain file %s\n", archive->archive_name, file_name);
+        return -1;
+    }
 
     res = open(file_name, O_RDONLY, 0);
     if(res == -1)
@@ -738,9 +744,34 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
             return 0;
         }
     }
+    
+    printf("this line should never have been reached\n");
+    return -1;
+    close(fd);
 }
 
-int archive_extract_member_cur_time(char *file_name)
+int archive_extract_member_cur_time(char *file_name, const struct Archive *archive)
 {
+    int res = 0;
+    int file_index = 0;
+
+    file_index = archive_contains_file(file_name, archive);
+    if(file_index <= 0)
+    {
+        printf("file is not a part of archive.");    
+    }
+
+    if(archive_extract_member(file_name, archive) == -1)
+        return -1;
     
+    struct utimbuf times;
+    times.actime = atol(archive->files[file_index].hdr.oscar_adate);
+    times.modtime = atol(archive->files[file_index].hdr.oscar_mdate);
+    res = utime(file_name, &times);
+    if(res == -1)
+    {
+        printf("failed to modify file dates\n");
+        return -1;
+    }
+    return 0;
 }

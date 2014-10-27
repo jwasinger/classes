@@ -115,10 +115,27 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_LONG_TOC)
     {
+        if(!cmd_args->has_arc_file)
+        {
+            printf("no archive file specified... exiting...\n");
+            return -1;
+        }
+
         disp_archive_long_toc(archive);         
     }
     else if (cmd_args->actions & ACTION_EXTRACT)
-    {
+    { 
+        if(cmd_args->num_files == 0)
+        {
+            printf("no files specified to extract... exiting...\n");
+            return -1;
+        }
+        else if(!cmd_args->has_arc_file)
+        {
+            printf("no archive file specified... exiting...\n");
+            return -1;
+        }
+
         res = archive_extract_member(cmd_args->files[0], archive);
         if(res == -1)
         {
@@ -127,8 +144,25 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_EXTRACT_CURR_TIME)
     {
+        if(cmd_args->num_files == 0)
+        {
+            printf("no files specified to extract... exiting...\n");
+            return -1;
+        }
+        else if(!cmd_args->has_arc_file)
+        {
+            printf("no archive file specified... exiting...\n");
+            return -1;
+        }
         
+        res = archive_extract_member_cur_time(cmd_args->files[0], archive);
+        if(res == -1)
+        {
+            return -1;
+        }
+        return 0;
     }
+    
     free_archive(&archive);
     free_CMDArgs(&cmd_args);
 	return 0;
