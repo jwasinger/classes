@@ -90,8 +90,11 @@ char *__get_mode_str(mode_t mode)
 
 char *__get_time(time_t t)
 {
+    time_t t2 = time(NULL);
+
+    struct tm *now = gmtime(&t2);
     char *output = malloc(sizeof(char) * 32);
-    strftime(output, 32, "%a %b %d %k:%M:%S %Y", &t);
+    strftime(output, 32, "%a %b %d %k:%M:%S %Y", now);
     return output;
 }
 
@@ -111,24 +114,35 @@ void disp_archive_long_toc(struct Archive *archive)
     char *access_date = NULL;
     char *modify_date = NULL;
     char *deleted = NULL;
+    
+    int gid = 0;
+    int uid = 0;
+    int adate = 0;
+    int mdate = 0;
 
     printf("Long table of contents for oscar archive file: %s\n", archive->archive_name);
     
     for(i = 0; i < archive->num_files; i++)
     {
         perms = __get_mode_str(archive->files[i].hdr.oscar_mode);
-        
+         
         memcpy(&perms_num[1], &archive->files[i].hdr.oscar_mode[3], 3);
         perms_num[0] = '0';
         perms_num[4] = '\0';
+        
+        uid = atoi(archive->files[i].hdr.oscar_gid);
+        gid = atoi(archive->files[i].hdr.oscar_uid);
 
-        grp_name = getgrnam(archive->files[i].hdr.oscar_gid)->gr_name;
-        owner_name = getpwnam(archive->files[i].hdr.oscar_uid)->pw_name;
+        grp_name = getgrgid((gid_t)gid)->gr_name;
+        owner_name = getpwuid(uid)->pw_name;
+        
+        adate = atoi(archive->files[i].hdr.oscar_adate);
+        mdate = atoi(archive->files[i].hdr.oscar_mdate);
 
-        access_date = __get_time(archive->files[i].hdr.oscar_adate);
-        modify_date = __get_time(archive->files[i].hdr.oscar_mdate);
+        access_date = __get_time(adate);
+        modify_date = __get_time(mdate);
         deleted = (archive->files[i].hdr.oscar_deleted == 'y')? "yes" : "no"; 
-
+        
         printf("  File name: %s\n", archive->files[i].hdr.oscar_name);
         printf("         File size:   %s bytes\n", archive->files[i].hdr.oscar_size);
         printf("         Permissions: %s (%d)\n", perms, perms_num);
@@ -137,7 +151,7 @@ void disp_archive_long_toc(struct Archive *archive)
         //printf("         Create date: %s\n", create_date);
         printf("         Access date: %s\n", access_date);
         printf("         Modify date: %s\n", modify_date);
-        printf("         Marked deleted: %s\n%", deleted);
+        printf("         Marked deleted: %s\n", deleted);
 
         free(perms);
         free(access_date);

@@ -17,9 +17,12 @@ myoscar.o:
 archive.o: 
 	$(CC) -g -c archive.h archive.c
 
-debug: myfile.o cmd_line_args.o archive.o myoscar.o
+toc.o: 
+	$(CC) -g -c toc.h toc.c
 
-	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GXX_FLAGS) myfile.o cmd_line_args.o archive.o myoscar.o
+debug: myfile.o cmd_line_args.o archive.o toc.o myoscar.o
+
+	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GXX_FLAGS) myfile.o toc.o cmd_line_args.o archive.o myoscar.o
 
 clean:
 	rm -rf ./*.h.gch ./*.o $(TARGET)

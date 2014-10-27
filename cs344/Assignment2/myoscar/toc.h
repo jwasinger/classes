@@ -2,6 +2,7 @@
 #define TOC_H
 
 #include <grp.h>
+#include <pwd.h>
 
 #include "archive.h"
 

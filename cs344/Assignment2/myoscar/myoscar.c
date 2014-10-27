@@ -11,6 +11,7 @@
 #include "cmd_line_args.h"
 #include "myfile.h"
 #include "archive.h"
+#include "toc.h"
 
 int error_exit()
 {
@@ -25,16 +26,6 @@ int print_verbose(char *str)
 	char *print_str = strcat(str, "\n");
 	printf(print_str);
 	return 0;
-}
-
-void print_toc(void)
-{
-    
-}
-
-void print_long_toc(void)
-{
-    
 }
 
 int add_files(struct Archive *archive, char **files, int num_files)
@@ -70,11 +61,7 @@ int main(int argc, char **argv)
     
     //if there is no archive file supplied exit
 
-    if(cmd_args->num_files == 0)
-    {
-        printf("no files specified... exiting...\n");
-        _Exit(-1);
-    }
+    
     res = open_archive(cmd_args->arc_file, &archive, 1);
     if(res == -1)
     {   
@@ -83,8 +70,12 @@ int main(int argc, char **argv)
 
     if (cmd_args->actions & ACTION_ADD_MEMBERS)
     {
-        //create an array containing all the files that need to be added
-         
+        if(cmd_args->num_files == 0)
+        {
+            printf("no files specified to archive... exiting...\n");
+            _Exit(-1);
+        }     
+        
         //add the values
         res = archive_add_files(archive, cmd_args->files, cmd_args->num_files); 
         if(res==-1)
@@ -94,6 +85,12 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_ADD_ALL)
     {
+        if(cmd_args->num_files == 0)
+        {
+            printf("no files specified to archive... exiting...\n");
+            _Exit(-1);
+        }     
+
         char **file_names;
         int num_files;
         res = get_pwd_reg_files(&file_names, &num_files);
@@ -114,11 +111,11 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_TOC)
     {
-        
+        disp_archive_toc(archive);
     }
     else if (cmd_args->actions & ACTION_LONG_TOC)
     {
-        
+       disp_archive_long_toc(archive);         
     }
 
     free_archive(&archive);
