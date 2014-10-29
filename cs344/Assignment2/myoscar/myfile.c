@@ -1,6 +1,11 @@
 #include "myfile.h"
 /* http://www.thegeekstuff.com/2012/06/c-directory/ */
 
+char *get_prog_name(const char *argv, int argc)
+{
+    char *prog_name = malloc(sizeof(char) * 32);
+    //use strchr here...
+}
 
 int __load_file(char *file_name, char **file_data, int *size)
 {
@@ -59,13 +64,14 @@ int __get_pwd_files(char ***file_names, int *num_files)
     
     while(1)
     {
+        errno = 0;
         entry = readdir(dp);
         if(entry == NULL)
         {
             if(errno != 0)
             {
                 error = errno;
-                printf("Error reading directory %s: %s\n", cwd, strerror(error));
+                printf("Error reading entry %s: %s\n", entry, strerror(error));
                 
                 for(i = 0; i < cur_num_files; i++)
                 {
@@ -133,6 +139,7 @@ int get_pwd_reg_files(char ***file_names, int *num_files)
     
     while(1)
     {
+        errno = 0;
         entry = readdir(dp);
         if(entry == NULL)
         {

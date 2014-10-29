@@ -86,12 +86,6 @@ int main(int argc, char **argv)
     }
     else if (cmd_args->actions & ACTION_ADD_ALL)
     {
-        if(cmd_args->num_files == 0)
-        {
-            printf("no files specified to archive... exiting...\n");
-            _Exit(-1);
-        }     
-
         char **file_names;
         int num_files;
         res = get_pwd_reg_files(&file_names, &num_files);

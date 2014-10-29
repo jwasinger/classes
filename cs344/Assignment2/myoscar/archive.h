@@ -39,8 +39,6 @@ void free_archive(struct Archive **archive);
 
 int archive_add_files(struct Archive *archive, char **files, int num_files);
 
-int archive_add_reg_files(struct Archive *archive); //add all regular files in the pwd
-
 void archive_disp_toc(const struct Archive *archive);
 
 void archive_disp_long_toc(const struct Archive *archive);

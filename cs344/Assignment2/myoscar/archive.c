@@ -329,11 +329,6 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
                printf("\nunexpected EOF for %s\n", current_file->hdr.oscar_name);
                return -1;
             }
-            if(strlen(current_file->file_data) != current_file->file_size)
-            {
-                printf("\ninvalid file size\n");
-                return -1;
-            }
 
             //fseek(fp, current_file->file_size, SEEK_CUR);
             state = STATE_READ_FILE_HEADER;
@@ -702,11 +697,6 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
     return 0;
 }
 
-int archive_add_reg_files(struct Archive *archive)
-{
-    
-}
-
 int archive_cleanse(struct Archive *archive)
 {
     int i = 0;
@@ -722,7 +712,6 @@ int archive_cleanse(struct Archive *archive)
             num_marked++;
         }
     }
-    
     
     return archive_delete_members(marked_files, num_marked, archive);
 }
