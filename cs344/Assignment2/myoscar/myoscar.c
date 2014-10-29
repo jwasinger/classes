@@ -75,6 +75,12 @@ int main(int argc, char **argv)
         res = archive_add_files(archive, cmd_args->files, cmd_args->num_files); 
         if(res==-1)
             return -1;
+        
+        res = write_archive(archive->archive_name, archive);
+        if(res == -1)
+        {
+            return -1;
+        }
 
         return 0;
     }
@@ -100,8 +106,14 @@ int main(int argc, char **argv)
             free(file_names);
             return -1;
         }
-
         free(file_names);
+        
+        res = write_archive(archive->archive_name, archive);
+        if(res == -1)
+        {
+            return -1;
+        }
+
         return 0;
     }
     else if (cmd_args->actions & ACTION_TOC)
@@ -150,14 +162,21 @@ int main(int argc, char **argv)
             return -1;
         }
         
-        res = archive_extract_member_cur_time(cmd_args->files[0], archive);
+        if(cmd_args->actions & ACTION_OVERWRITE)
+        {
+            res = archive_extract_member_cur_time(cmd_args->files[0], archive, 1);
+        }
+        else
+        {
+            res = archive_extract_member_cur_time(cmd_args->files[0], archive, 0);
+        }
+        
         if(res == -1)
         {
             return -1;
         }
-        return 0;
     }
-    if(cmd_args->actions & ACTION_DELETE)
+    else if(cmd_args->actions & ACTION_DELETE)
     {
         if(cmd_args->num_files == 0)
         {
@@ -170,12 +189,48 @@ int main(int argc, char **argv)
             return -1;
         }
 
-        res = archive_delete_member(cmd_args->files[0], archive);
+        res = archive_delete_members(cmd_args->files, cmd_args->num_files, archive);
+        if(res == -1)
+        {
+            return -1;    
+        }
+        
+        res = write_archive(archive->archive_name, archive);
+        if(res == -1)
+        {
+            return -1;
+        }
+    }
+    else if(cmd_args->actions & ACTION_MARK)
+    {
+        res = archive_mark_members(cmd_args->files, cmd_args->num_files, archive);
+        if(res == -1)
+            return -1;
+
+        res = write_archive(archive->archive_name, archive);
+        if(res == -1)
+            return -1;
+    }
+    else if(cmd_args->actions & ACTION_UNMARK)
+    {
+        res = archive_unmark_members(cmd_args->files, cmd_args->num_files, archive);
+        if(res == -1)
+            return -1;
+        
+        res = write_archive(archive->archive_name, archive);
+        if(res == -1)
+            return -1;
+    }
+    else if(cmd_args->actions & ACTION_CLEANSE)
+    {
+        res = archive_cleanse(archive);
+
+        res = write_archive(archive->archive_name, archive);
         if(res == -1)
             return -1;
     }
 
-    free_archive(&archive);
+    //free_archive(&archive);
     free_CMDArgs(&cmd_args);
 	return 0;
 }

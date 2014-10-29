@@ -214,7 +214,7 @@ int __expand_archive(struct Archive *archive)
 void __free_archive_file(struct ArchiveFile *arc_file)
 {
     free(arc_file->file_data);
-    free(arc_file);
+    arc_file->file_data = NULL;
 }
 
 void free_archive(struct Archive **archive)
@@ -349,11 +349,11 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
     return 0;
 }
 
-int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
+int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr, int *hdr_size_written)
 {
     int res = -1;
     int error = 0;
-
+    
     res = write(fd, hdr->oscar_name, OSCAR_MAX_FILE_NAME_LEN);
     if(res == -1)
     {
@@ -361,6 +361,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_name: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_name_len, 2);
     if(res == -1)
@@ -369,7 +370,8 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_name_len: %s", strerror(error));
         return -1;
     }
-
+    *hdr_size_written += res;
+    
     res = write(fd, hdr->oscar_cdate, OSCAR_DATE_SIZE);
     if(res == -1)
     {
@@ -377,6 +379,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_cdate: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_adate, OSCAR_DATE_SIZE);
     if(res == -1)
@@ -385,6 +388,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_adate: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_mdate, OSCAR_DATE_SIZE);
     if(res == -1)
@@ -393,6 +397,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_mdate: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_uid, OSCAR_UGID_SIZE);
     if(res == -1)
@@ -401,6 +406,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_uid: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_gid, OSCAR_UGID_SIZE);
     if(res == -1)
@@ -409,6 +415,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_gid: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_mode, OSCAR_MODE_SIZE);
     if(res == -1)
@@ -417,6 +424,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_mode: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_size, OSCAR_FILE_SIZE);
     if(res == -1)
@@ -425,6 +433,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_size: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, &(hdr->oscar_deleted), 1);
     if(res == -1)
@@ -433,6 +442,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_deleted: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_sha1, OSCAR_SHA_DIGEST_LEN);
     if(res == -1)
@@ -441,6 +451,7 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_sha1: %s", strerror(error));
         return -1;
     }
+    *hdr_size_written += res;
 
     res = write(fd, hdr->oscar_hdr_end, OSCAR_HDR_END_LEN);
     if(res == -1)
@@ -449,15 +460,17 @@ int __write_oscar_hdr(int fd, const struct oscar_hdr *hdr)
         printf("error writing oscar_hdr_end: %s", strerror(error));
         return -1;
     }
-
+    *hdr_size_written += res;
+    
     return 0;
 }
 
-int __write_file(int fd, const struct ArchiveFile *file)
+int __write_file(int fd, const struct ArchiveFile *file, int *out_size_written)
 {
     int res = -1;
+    int hdr_size_written = 0;
 
-    res = __write_oscar_hdr(fd, &file->hdr); 
+    res = __write_oscar_hdr(fd, &file->hdr, &hdr_size_written); 
     if(res == -1)
     {
         return -1;
@@ -470,6 +483,8 @@ int __write_file(int fd, const struct ArchiveFile *file)
         return -1;
     }
     
+    *out_size_written = hdr_size_written + res;
+
     return 0;
 }
 
@@ -499,6 +514,9 @@ int write_archive(char *file_name, struct Archive *archive)
     int res = -1;
     char *oscar_hdr_str = OSCAR_ID;
     int i = 0;
+    char cur_oscar_hdr_str[OSCAR_ID_LEN];
+    int size_written = 0;
+    int file_size_written = 0;
 
     res = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
 
@@ -511,7 +529,7 @@ int write_archive(char *file_name, struct Archive *archive)
     {
         fd = res;
     }
-
+    
     /* write the archive header */
     res = write(fd, (void *)oscar_hdr_str, OSCAR_ID_LEN); 
     if(res < OSCAR_ID_LEN)
@@ -520,14 +538,28 @@ int write_archive(char *file_name, struct Archive *archive)
         printf("Error(?): %s\n", strerror(errno));
         return -1;
     }
+    
+    size_written += OSCAR_ID_LEN;
 
     /* write each of the archives files */
     for(; i < archive->num_files; i++)
     {
-        if(__write_file(fd, &(archive->files[i])) == -1)
+        if(__write_file(fd, &(archive->files[i]), &file_size_written) == -1)
             return -1;
-    }
 
+       size_written += file_size_written; 
+    }
+    
+    /* if there is still text left in the archive file, clear it */
+    
+    res = ftruncate(fd, size_written);
+    if(res == -1)
+    {
+        printf("failed to truncate file %s.  Error: %s\n", archive->archive_name, strerror(errno));
+        return -1;
+    }
+    
+    close(fd);
     return 0;
 }
 
@@ -647,6 +679,7 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
     int res = 0;
     struct ArchiveFile *arc_file = NULL;
     int out_index = 0; 
+    int size_written = 0;
 
     for(; i < num_files; i++)
     {
@@ -666,17 +699,7 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
         //else if(cmp == 1) print something in verbose mode here...
     }
 
-    res = write_archive(archive->archive_name, archive);
-    if(res == -1)
-    {
-        return -1;
-    }
-}
-
-
-int archive_del_files(struct Archive *archive, char *file_names, int num_files)
-{
-    
+    return 0;
 }
 
 int archive_add_reg_files(struct Archive *archive)
@@ -684,7 +707,27 @@ int archive_add_reg_files(struct Archive *archive)
     
 }
 
-int archive_extract_member(char *file_name, const struct Archive *archive)
+int archive_cleanse(struct Archive *archive)
+{
+    int i = 0;
+    char **marked_files = malloc(sizeof(char *) * archive->num_files);
+    int num_marked = 0;
+
+    for(i = 0; i < archive->num_files; i++)
+    {
+        if(archive->files[i].hdr.oscar_deleted == 'y')
+        {
+            marked_files[i] = malloc(sizeof(char) * OSCAR_MAX_FILE_NAME_LEN);
+            strncpy(marked_files[i], archive->files[i].hdr.oscar_name, OSCAR_MAX_FILE_NAME_LEN);
+            num_marked++;
+        }
+    }
+    
+    
+    return archive_delete_members(marked_files, num_marked, archive);
+}
+
+int archive_extract_member(char *file_name, const struct Archive *archive, int overwrite)
 {
     int res = 0;
     int error = 0;
@@ -697,6 +740,20 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
         printf("archive %s doesn't contain file %s\n", archive->archive_name, file_name);
         return -1;
     }
+    
+    if(overwrite)
+    {
+        res = remove(file_name);
+        if(res == -1)
+        {
+            if(errno != ENOENT) 
+            {
+                error = errno;
+                printf("File deletion error on file '%s': %s\n", file_name, strerror(error));
+                return -1;
+            }
+        }
+    }
 
     res = open(file_name, O_RDONLY, 0);
     if(res == -1)
@@ -708,9 +765,9 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
             return -1;
         }
     }
-    else
-    {
-        return 1; //file with same name as the one that was supposed to be extracted already exists
+    else if(!overwrite)
+    {   
+        return 1; //quit out and don't overwrite the file that currently exists
     }
 
     res = open(file_name, O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR);
@@ -743,7 +800,7 @@ int archive_extract_member(char *file_name, const struct Archive *archive)
     close(fd);
 }
 
-int archive_extract_member_cur_time(char *file_name, const struct Archive *archive)
+int archive_extract_member_cur_time(char *file_name, const struct Archive *archive, int overwrite)
 {
     int res = 0;
     int file_index = 0;
@@ -755,7 +812,7 @@ int archive_extract_member_cur_time(char *file_name, const struct Archive *archi
         return -1;
     }
 
-    if(archive_extract_member(file_name, archive) == -1)
+    if(archive_extract_member(file_name, archive, overwrite) == -1)
         return -1;
     
     struct utimbuf times;
@@ -775,31 +832,107 @@ int __archive_delete_index(int index, struct Archive *archive)
     int i = 0;
 
     __free_archive_file(&(archive->files[index]));
-    memcpy(&(archive->files[index]), &(archive->files[index+1]), sizeof(struct ArchiveFile) * (archive->num_files - (index + 1)));
+    memmove(archive->files + index, archive->files + index + 1, sizeof(struct ArchiveFile) * (archive->num_files - (index + 1)));
 
     return 0;
 }
 
-int archive_delete_member(char *file_name, struct Archive *archive)
+int archive_delete_members(char **files, int num_files, struct Archive *archive)
 {
     int res = 0;
     int file_index = 0;
+    int size_written = 0;
+    int fd = 0;
+    int i = 0;
+    
+    for(i = 0; i < num_files; i++)
+    {
+        res = archive_contains_file(files[i], archive, &file_index);
+        if(res == -1)
+        {
+            return -1;
+        }
+        else if (res == 0)
+        {
+            printf("file '%s' is not a member of archive '%s'\n", files[i], archive->archive_name);
+            return -1;
+        }
+        
+        __archive_delete_index(file_index, archive);
+        archive->num_files--;
+    }
 
-    res = archive_contains_file(file_name, archive, &file_index);
+    res = remove(archive->archive_name);
     if(res == -1)
     {
+        printf("error trying to remove file %s: %s\n", archive->archive_name, strerror(errno));
         return -1;
     }
-    else if (res == 0)
+
+    return 0;
+}
+
+int archive_mark_members(char **file_names, int num_files, struct Archive *archive)
+{
+    int i = 0;
+    int file_index = 0;
+    int res = 0;
+
+    for(i = 0; i < num_files; i++)
     {
-        printf("file '%s' is not a member of archive '%s'\n", file_name, archive->archive_name);
-        return -1;
+        res = archive_contains_file(file_names[i], archive, &file_index);
+        if(res == -1)
+        {
+            return -1;
+        }
+        if(res == 0)
+        {
+            printf("file '%s' is not a part of the archive...\n", file_names[i]);
+        }
+        if(res == 1)
+        {
+            if(archive->files[file_index].hdr.oscar_deleted == 'y')
+            {
+                printf("file %s is already marked...\n", archive->files[file_index].hdr.oscar_name);
+                continue;
+            }
+            
+            archive->files[file_index].hdr.oscar_deleted = 'y';
+        }
     }
-    
-    __archive_delete_index(file_index, archive);
-    
-    res = write_archive(archive->archive_name, archive);
-    if(res == -1)
-        return -1;
+
+    return 0;
+}
+
+
+int archive_unmark_members(char **file_names, int num_files, struct Archive *archive)
+{
+    int i = 0;
+    int file_index = 0;
+    int res = 0;
+
+    for(i = 0; i < num_files; i++)
+    {
+        res = archive_contains_file(file_names[i], archive, &file_index);
+        if(res == -1)
+        {
+            return -1;
+        }
+        if(res == 0)
+        {
+            printf("file '%s' is not a part of the archive...\n", file_names[i]);
+        }
+        if(res == 1)
+        {
+            if(archive->files[file_index].hdr.oscar_deleted == ' ')
+            {
+                printf("file %s is not marked...\n", archive->files[file_index].hdr.oscar_name);
+                continue;
+            }
+            
+            archive->files[file_index].hdr.oscar_deleted = ' ';
+        }
+    }
+
     return 0;
 }

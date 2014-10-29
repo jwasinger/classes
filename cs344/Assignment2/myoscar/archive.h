@@ -32,14 +32,12 @@ struct Archive
 /* try and open the archive file 'file_name', create a new archive if the file doesn't exist and 'create'=1 */
 int open_archive(char *file_name, struct Archive **out_archive, int create);
 
-/* write out the archive to disk */
+/* write out the archive to disk.  only write out parts that differ from the file on disk*/
 int write_archive(char *file_name, struct Archive *archive);
 
 void free_archive(struct Archive **archive);
 
 int archive_add_files(struct Archive *archive, char **files, int num_files);
-
-int archive_del_files(struct Archive *archive, char *file_names, int num_files); 
 
 int archive_add_reg_files(struct Archive *archive); //add all regular files in the pwd
 
@@ -49,9 +47,16 @@ void archive_disp_long_toc(const struct Archive *archive);
 
 int archive_contains_file(char *file_name, const struct Archive *archive, int *out_index);
 
-int archive_extract_member(char *file_name, const struct Archive *archive);
+int archive_extract_members(char **file_name, int num_files, const struct Archive *archive, int overwrite);
 
-int archive_extract_member_cur_time(char *file_name, const struct Archive *archive);
+int archive_extract_members_cur_time(char **file_name, int num_files, const struct Archive *archive, int overwrite);
 
-int archive_delete_member(char *file_name, struct Archive *archive);
+//delete archive files making only ONE pass through the archive file
+int archive_delete_members(char **file_names, int num_files, struct Archive *archive);
+
+int archive_cleanse(struct Archive *archive);
+
+int archive_mark_members(char **file_names, int num_files, struct Archive *archive);
+
+int archive_unmark_members(char **file_names, int num_files, struct Archive *archive);
 #endif
