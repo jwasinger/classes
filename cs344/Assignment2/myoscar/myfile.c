@@ -116,7 +116,7 @@ int __get_pwd_files(char ***file_names, int *num_files)
     }
 }
 
-int get_pwd_reg_files(char ***file_names, int *num_files)
+int get_pwd_reg_files(char ***file_names, int *num_files, char *arc_file_name, char *prog_name)
 {
     int file_names_cap = 2;
     int cur_num_files = 0;
@@ -163,7 +163,11 @@ int get_pwd_reg_files(char ***file_names, int *num_files)
             }
         }
         
-        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || !(entry->d_type & DT_REG))
+        if(strcmp(entry->d_name, ".") == 0 || 
+          strcmp(entry->d_name, "..") == 0 || 
+                 !(entry->d_type & DT_REG) || 
+                 strcmp(entry->d_name, prog_name) == 0 ||
+                 strcmp(entry->d_name, arc_file_name) == 0)
             continue;
         
         //add the file name to file_names and enlarge the array if necessary

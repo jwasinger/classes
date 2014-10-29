@@ -12,7 +12,7 @@
 int load_pwd_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files);
 int load_pwd_reg_files(char ***files_data_out, int **sizes_out, char ***file_names_out, int *num_files);
 
-int get_pwd_reg_files(char ***file_names, int *num_files);
+int get_pwd_reg_files(char ***file_names, int *num_files, char *arc_file_name, char *prog_name);
 
 /* internal functions in myfile.c
 

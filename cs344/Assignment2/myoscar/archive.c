@@ -324,7 +324,7 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
                 printf("\nreading file data failed for %s\n", current_file->hdr.oscar_name);
                 return -1;
             }
-            else if( res == 0)
+            else if( res == 0 && current_file->file_size != 0)
             {
                printf("\nunexpected EOF for %s\n", current_file->hdr.oscar_name);
                return -1;

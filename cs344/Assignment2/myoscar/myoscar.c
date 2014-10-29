@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     {
         char **file_names;
         int num_files;
-        res = get_pwd_reg_files(&file_names, &num_files);
+        res = get_pwd_reg_files(&file_names, &num_files, cmd_args->arc_file, "myoscar");
         if(res == -1)
         {
             return -1; 
