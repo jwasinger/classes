@@ -3,7 +3,7 @@
 
 char *__get_mode_str(mode_t mode)
 {
-    char *result = malloc(sizeof(char) * 10);
+    char *result = malloc(sizeof(char) * 11);
     int i = 0; 
     
     memset(result, 0, sizeof(char) * 10);
@@ -85,6 +85,7 @@ char *__get_mode_str(mode_t mode)
         }
     }
 
+    result[10] = '\0';
     return result;
 }
 
