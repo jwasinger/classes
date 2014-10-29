@@ -43,7 +43,7 @@ void archive_disp_toc(const struct Archive *archive);
 
 void archive_disp_long_toc(const struct Archive *archive);
 
-int archive_contains_file(char *file_name, const struct Archive *archive, int *out_index);
+int archive_contains_file(char *file_name, const struct Archive *archive, int **out_indices, int *out_num_indices);
 
 int archive_extract_members(char **file_name, int num_files, const struct Archive *archive, int overwrite);
 

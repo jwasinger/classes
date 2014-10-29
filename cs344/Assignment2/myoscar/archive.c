@@ -194,20 +194,37 @@ int __read_line(char **line_ptr, int *n, int fd)
     return 0;
 }
 
+int __expand_array(void **array, int cur_size, int desired_size)
+{
+    if(desired_size < cur_size)
+    {
+        printf("desired size smaller than current size of array\n");
+        return -1;
+    }
+
+    void *tmp = malloc(desired_size);
+    memcpy(tmp, *array, cur_size);
+    free(*array);
+    *array = tmp;
+    return 0;
+}
+
 /* expand the array of files in an archive structure if we reach the end of 'files' */ 
 int __expand_archive(struct Archive *archive)
 {
     /* copy the files array */
-    struct ArchiveFile *new_array = malloc(sizeof(struct ArchiveFile) * archive->size_files * 2);
-    if(!new_array)
+    //struct ArchiveFile *new_array = malloc(sizeof(struct ArchiveFile) * archive->size_files * 2);
+    //if(!new_array)
+    //    return -1;
+    
+    int res = __expand_array(&(archive->files), 
+                             archive->size_files*sizeof(struct ArchiveFile), 
+                             archive->size_files * 2 *sizeof(struct ArchiveFile));
+    if(res == -1)
         return -1;
-    
-    memcpy(new_array, archive->files, sizeof(struct ArchiveFile) * archive->num_files);
+
+    //memcpy(new_array, archive->files, sizeof(struct ArchiveFile) * archive->num_files);
     archive->size_files *= 2;
-    
-    /* delete the old array */
-    free(archive->files);
-    archive->files = new_array;
     return 0;
 }
 
@@ -483,23 +500,35 @@ int __write_file(int fd, const struct ArchiveFile *file, int *out_size_written)
     return 0;
 }
 
-int archive_contains_file(char *file_name, const struct Archive *archive, int *out_index)
+int archive_contains_file(char *file_name, const struct Archive *archive, int **out_indices, int *out_num_indices)
 {
     int i = 0;
     int res = 0;
     struct oscar_hdr hdr;
     char *file_data;
     int error = 0;
+    int size_indices = 0;
+
+    *out_indices = malloc(sizeof(int) * 10);
+    *out_num_indices = 0;
     
     for(; i < archive->num_files; i++)
     {
         if(strstr(archive->files[i].hdr.oscar_name, file_name) != NULL)
         {    
-            (*out_index) = i;
-            return 1;    
+            if(*out_num_indices == size_indices)
+            {
+                __expand_array(out_indices, size_indices, size_indices * 2);
+                size_indices *= 2;
+            }
+            
+            (*out_indices)[*out_num_indices] = i;
+            (*out_num_indices)++;
         }
     }
     
+    if(*out_num_indices > 0)
+        return 1;
     return 0;
 }
 
@@ -678,20 +707,13 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
 
     for(; i < num_files; i++)
     {
-        cmp = archive_contains_file(files[i], archive, &out_index); 
-        if(cmp == -1)
-            return -1;    
-        else if(cmp == 0)
-        {
-            res = __populate_arc_file_struct(files[i], &arc_file);
-            if(res == -1)
-                return -1;
+        res = __populate_arc_file_struct(files[i], &arc_file);
+        if(res == -1)
+            return -1;
 
-            res = __archive_add_file(archive, arc_file);
-            if(res == -1)
-                return -1;
-        }
-        //else if(cmp == 1) print something in verbose mode here...
+        res = __archive_add_file(archive, arc_file);
+        if(res == -1)
+            return -1;
     }
 
     return 0;
@@ -700,20 +722,19 @@ int archive_add_files(struct Archive *archive, char **files, int num_files)
 int archive_cleanse(struct Archive *archive)
 {
     int i = 0;
-    char **marked_files = malloc(sizeof(char *) * archive->num_files);
-    int num_marked = 0;
+    int new_num_files = archive->num_files;
 
     for(i = 0; i < archive->num_files; i++)
     {
         if(archive->files[i].hdr.oscar_deleted == 'y')
         {
-            marked_files[i] = malloc(sizeof(char) * OSCAR_MAX_FILE_NAME_LEN);
-            strncpy(marked_files[i], archive->files[i].hdr.oscar_name, OSCAR_MAX_FILE_NAME_LEN);
-            num_marked++;
+            __archive_delete_index(i, archive);
+            new_num_files--;
         }
     }
     
-    return archive_delete_members(marked_files, num_marked, archive);
+    archive->num_files = new_num_files;
+    return 0;
 }
 
 int archive_extract_member(char *file_name, const struct Archive *archive, int overwrite)
@@ -722,9 +743,11 @@ int archive_extract_member(char *file_name, const struct Archive *archive, int o
     int error = 0;
     int fd = 0;
     int i = 0;
-    int out_index;
+    
+    int *out_index;
+    int num_indices = 0;
 
-    if(!archive_contains_file(file_name, archive, &out_index))
+    if(!archive_contains_file(file_name, archive, &out_index, &num_indices))
     {
         printf("archive %s doesn't contain file %s\n", archive->archive_name, file_name);
         return -1;
@@ -793,8 +816,11 @@ int archive_extract_member_cur_time(char *file_name, const struct Archive *archi
 {
     int res = 0;
     int file_index = 0;
+    
+    int *out_indices = NULL;
+    int num_indices = 0;
 
-    res = archive_contains_file(file_name, archive, &file_index);
+    res = archive_contains_file(file_name, archive, &out_indices, &num_indices);
     if(res <= 0)
     {
         printf("file is not a part of archive.");    
@@ -826,17 +852,28 @@ int __archive_delete_index(int index, struct Archive *archive)
     return 0;
 }
 
+int __archive_file_is_marked(struct ArchiveFile *arc_file)
+{
+    if(arc_file->hdr.oscar_deleted == 'y')
+        return 1;
+    else
+        return 0;
+}
+
 int archive_delete_members(char **files, int num_files, struct Archive *archive)
 {
     int res = 0;
-    int file_index = 0;
     int size_written = 0;
     int fd = 0;
     int i = 0;
-    
+    int j = 0;
+
+    int *file_indices = NULL; //memory leak
+    int num_indices = 0;
+
     for(i = 0; i < num_files; i++)
     {
-        res = archive_contains_file(files[i], archive, &file_index);
+        res = archive_contains_file(files[i], archive, &file_indices, &num_indices);
         if(res == -1)
         {
             return -1;
@@ -847,8 +884,11 @@ int archive_delete_members(char **files, int num_files, struct Archive *archive)
             return -1;
         }
         
-        __archive_delete_index(file_index, archive);
-        archive->num_files--;
+        if(!__archive_file_is_marked(archive->files + file_indices[0]))
+        {    
+            __archive_delete_index(file_indices[0], archive);
+            archive->num_files--;
+        }
     }
 
     res = remove(archive->archive_name);
@@ -866,10 +906,14 @@ int archive_mark_members(char **file_names, int num_files, struct Archive *archi
     int i = 0;
     int file_index = 0;
     int res = 0;
+    int j = 0;
+    
+    int num_indices = 0;
+    int *indices = NULL;
 
     for(i = 0; i < num_files; i++)
     {
-        res = archive_contains_file(file_names[i], archive, &file_index);
+        res = archive_contains_file(file_names[i], archive, &indices, &num_indices);
         if(res == -1)
         {
             return -1;
@@ -880,13 +924,16 @@ int archive_mark_members(char **file_names, int num_files, struct Archive *archi
         }
         if(res == 1)
         {
-            if(archive->files[file_index].hdr.oscar_deleted == 'y')
+            for(j=0; j<num_indices; j++)
             {
-                printf("file %s is already marked...\n", archive->files[file_index].hdr.oscar_name);
-                continue;
+                if(archive->files[indices[j]].hdr.oscar_deleted == 'y')
+                {
+                    printf("file %s is already marked...\n", archive->files[file_index].hdr.oscar_name);
+                    continue;
+                }
+                
+                archive->files[indices[j]].hdr.oscar_deleted = 'y';
             }
-            
-            archive->files[file_index].hdr.oscar_deleted = 'y';
         }
     }
 
@@ -897,12 +944,15 @@ int archive_mark_members(char **file_names, int num_files, struct Archive *archi
 int archive_unmark_members(char **file_names, int num_files, struct Archive *archive)
 {
     int i = 0;
-    int file_index = 0;
     int res = 0;
+    int j = 0;
+
+    int num_indices = 0;
+    int *file_indices = NULL;
 
     for(i = 0; i < num_files; i++)
     {
-        res = archive_contains_file(file_names[i], archive, &file_index);
+        res = archive_contains_file(file_names[i], archive, &file_indices, &num_indices);
         if(res == -1)
         {
             return -1;
@@ -913,13 +963,16 @@ int archive_unmark_members(char **file_names, int num_files, struct Archive *arc
         }
         if(res == 1)
         {
-            if(archive->files[file_index].hdr.oscar_deleted == ' ')
+            for(j = 0; j < num_indices; j++)
             {
-                printf("file %s is not marked...\n", archive->files[file_index].hdr.oscar_name);
-                continue;
+                if(archive->files[file_indices[j]].hdr.oscar_deleted == ' ')
+                {
+                    printf("file %s is not marked...\n", archive->files[file_indices[j]].hdr.oscar_name);
+                    continue;
+                }
+                
+                archive->files[file_indices[j]].hdr.oscar_deleted = ' ';
             }
-            
-            archive->files[file_index].hdr.oscar_deleted = ' ';
         }
     }
 

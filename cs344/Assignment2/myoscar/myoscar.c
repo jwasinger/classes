@@ -48,21 +48,48 @@ int main(int argc, char **argv)
         _Exit(-1);
     }
 
-    //if(open_archive("test", archive) == -1)
-    //{
-    //    printf("failure\n");
-    //    _Exit(-1);
-    //}
-    
-    //if there is no archive file supplied exit
+    if(cmd_args->actions & ACTION_HELP)
+    {
+        printf("\n\
+                Options---------------------------------\n\
+                -a [archive file name] [file 1] [file 2] ...\n\
+                    adds file(s) to the archive. Creates a new archive file if one is not found\n\
+                -A [archive file name]\n\
+                    adds all regular files in the cwd to the archive file with the exception of the archive\n\
+                    file itself and the myoscar executable.\n\
+                -d [archive file name] [file 1] [file 2] ...\n\
+                    deletes specified file(s) out of the archive.\n\
+                -m [archive file name] [file 1] [file 2] ...\n\
+                    marks specified file(s) as being deleted in the archive.\n\
+                -u [archive file name] [file 1] [file 2] ...\n\
+                    unmarks specified file(s) as being deleted in the archive.\n\
+                -C [archive file name] \n\
+                    deletes all marked files from the archive\n\
+                -e [archive file name] [file 1] [file 2] ...\n\
+                    extract specified file(s) to the cwd.  If the -o option is specified, then the file(s) will\n\
+                    overwrite existing file(s) with the same name. \n\
+                -t [archive file name]\n\
+                    list a short table of contents\n\
+                -T [archive file name]\n\
+                    list a long table of contents\n\
+                -v\n\
+                    verbose processing\n\
+                -V\n\
+                    print version information\n\
+        \n");
+        _Exit(0);
+    }
+    else if (cmd_args->actions & ACTION_VERSION)
+    {
+        printf("MYOSCAR Archiving Utility (1.0).  Author: Jared Wasinger\n");
+        _Exit(0);
+    }
 
-    
     res = open_archive(cmd_args->arc_file, &archive, 1);
     if(res == -1)
     {   
         _Exit(-1);
     }
-
     if (cmd_args->actions & ACTION_ADD_MEMBERS)
     {
         if(cmd_args->num_files == 0)
