@@ -48,7 +48,12 @@ int main(int argc, char **argv)
         _Exit(-1);
     }
 
-    if(cmd_args->actions & ACTION_HELP)
+    if (cmd_args->actions & ACTION_VERSION)
+    {
+        printf("MYOSCAR Archiving Utility (1.0).  Author: Jared Wasinger\n");
+        _Exit(0);
+    }
+    else if(cmd_args->actions & ACTION_HELP)
     {
         printf("\n\
                 Options---------------------------------\n\
@@ -79,17 +84,13 @@ int main(int argc, char **argv)
         \n");
         _Exit(0);
     }
-    else if (cmd_args->actions & ACTION_VERSION)
-    {
-        printf("MYOSCAR Archiving Utility (1.0).  Author: Jared Wasinger\n");
-        _Exit(0);
-    }
-
+    
     res = open_archive(cmd_args->arc_file, &archive, 1);
     if(res == -1)
     {   
         _Exit(-1);
     }
+    
     if (cmd_args->actions & ACTION_ADD_MEMBERS)
     {
         if(cmd_args->num_files == 0)
@@ -163,8 +164,16 @@ int main(int argc, char **argv)
             printf("no archive file specified... exiting...\n");
             return -1;
         }
-
-        res = archive_extract_member(cmd_args->files[0], archive);
+    
+        if(cmd_args->actions & ACTION_OVERWRITE)
+        {
+            res = archive_extract_member(cmd_args->files[0], archive, 1);
+        }
+        else
+        {
+            res = archive_extract_member(cmd_args->files[0], archive, 0);
+        }
+        
         if(res == -1)
         {
             return -1;    

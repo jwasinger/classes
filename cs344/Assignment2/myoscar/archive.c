@@ -766,7 +766,7 @@ int archive_extract_member(char *file_name, const struct Archive *archive, int o
             }
         }
     }
-
+    
     res = open(file_name, O_RDONLY, 0);
     if(res == -1)
     {
