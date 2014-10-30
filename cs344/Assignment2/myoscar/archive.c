@@ -90,6 +90,11 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
 
     file_size = lltoa(st.st_size, OSCAR_FILE_SIZE);
     name_len = itoa(strlen(file_name), 2);
+    if(name_len[1] == ' ')
+    {
+        name_len[1] = name_len[0];
+        name_len[0] = ' ';
+    }
     adate = ltoa(st.st_atime, OSCAR_DATE_SIZE);
     mdate = ltoa(st.st_mtime, OSCAR_DATE_SIZE);
     cdate = ltoa(st.st_ctime, OSCAR_DATE_SIZE);
@@ -98,6 +103,7 @@ int __create_oscar_hdr(int fd, char *file_name, struct oscar_hdr *hdr_out)
     mode = itoa_oct(st.st_mode, OSCAR_MODE_SIZE);
     
     strcpy(hdr_out->oscar_name, file_name);
+    hdr_out->oscar_name[strlen(file_name)] = '\0';
     strncpy(hdr_out->oscar_name_len, name_len, 2);
     strncpy(hdr_out->oscar_cdate, cdate, OSCAR_DATE_SIZE); //does st.st_birthtime exist?
     strncpy(hdr_out->oscar_adate, adate, OSCAR_DATE_SIZE); // THIS IS INCORRECT
@@ -322,7 +328,8 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
  
             current_file = &((*archive)->files[(*archive)->num_files]);
             memcpy(&(current_file->hdr), line, OSCAR_HDR_SIZE);
-    
+            
+            
             (*archive)->num_files++;
             
             int i_size = atoi(current_file->hdr.oscar_size);

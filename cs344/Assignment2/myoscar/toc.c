@@ -227,14 +227,14 @@ void disp_archive_long_toc(struct Archive *archive)
         }
         
         printf("  File name: %.*s\n", OSCAR_MAX_FILE_NAME_LEN, archive->files[i].hdr.oscar_name);
-        printf("         File size:   %s bytes\n", oscar_size);
-        printf("         Permissions: %s (%s)\n", perms, perms_num);
-        printf("         File owner:  %s (uid: %d)\n", owner_name, uid);
-        printf("         File group:  %s (gid: %d)\n", grp_name, gid);
-        printf("         Create date: %s\n", create_date);
-        printf("         Access date: %s\n", access_date);
-        printf("         Modify date: %s\n", modify_date);
-        printf("         Marked deleted: %s\n", deleted);
+        printf("\t File size:   %s bytes\n", oscar_size);
+        printf("\t Permissions: %s (%s)\n", perms, perms_num);
+        printf("\t File owner:  %s (uid: %d)\n", owner_name, uid);
+        printf("\t File group:  %s (gid: %d)\n", grp_name, gid);
+        printf("\t Create date: %s\n", create_date);
+        printf("\t Access date: %s\n", access_date);
+        printf("\t Modify date: %s\n", modify_date);
+        printf("\t Marked deleted: %s\n", deleted);
 
         free(perms);
         free(access_date);
