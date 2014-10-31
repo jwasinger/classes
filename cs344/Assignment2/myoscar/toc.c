@@ -1,5 +1,12 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References: tlpi page 281 
+**********************/
+
 #include "toc.h"
-/*tlpi page 281 */
 
 char *__get_mode_str(mode_t mode)
 {

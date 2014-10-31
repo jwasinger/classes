@@ -1,3 +1,12 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References: http://stackoverflow.com/questions/1114741/how-to-convert-int-to-char-c
+**********************/
+
+//NOTE:  This assignment is attempting all of the offered extra credit options
 #include "archive.h"
 
 
@@ -731,13 +740,16 @@ int archive_cleanse(struct Archive *archive)
     int i = 0;
     int new_num_files = archive->num_files;
 
-    for(i = 0; i < archive->num_files; i++)
+    while(i < new_num_files)
     {
         if(archive->files[i].hdr.oscar_deleted == 'y')
         {
             __archive_delete_index(i, archive);
             new_num_files--;
+            continue;
         }
+
+        i++;
     }
     
     archive->num_files = new_num_files;

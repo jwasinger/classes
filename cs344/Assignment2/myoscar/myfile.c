@@ -1,3 +1,11 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References: http://www.thegeekstuff.com/2012/06/c-directory/ 
+**********************/
+
 #include "myfile.h"
 /* http://www.thegeekstuff.com/2012/06/c-directory/ */
 

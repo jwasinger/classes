@@ -1,3 +1,11 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References: 
+**********************/
+
 #ifndef CMD_LINE_ARGS_H
 #define CMD_LINE_ARGS_H
 
