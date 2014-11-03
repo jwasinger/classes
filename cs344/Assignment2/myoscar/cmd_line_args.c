@@ -1,3 +1,10 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References: http://stackoverflow.com/questions/1114741/how-to-convert-int-to-char-c
+**********************/
 #include "cmd_line_args.h"
 
 int proc_cmd_line_args(int argc, char **argv, struct CMDArgs *out_cmd_args)

@@ -47,6 +47,11 @@ int main(int argc, char **argv)
         printf("Failure!\n");
         _Exit(-1);
     }
+    
+    if (cmd_args->actions & ACTION_VERBOSE)
+    {
+        printf("Hello world! Printing in verbose mode!\n");
+    }
 
     if (cmd_args->actions & ACTION_VERSION)
     {

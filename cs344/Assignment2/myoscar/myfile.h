@@ -1,3 +1,11 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #2
+References:  
+**********************/
+
 #ifndef MYFILE_H
 #define MYFILE_H
 
