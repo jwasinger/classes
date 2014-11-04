@@ -338,7 +338,6 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
             current_file = &((*archive)->files[(*archive)->num_files]);
             memcpy(&(current_file->hdr), line, OSCAR_HDR_SIZE);
             
-<<<<<<< HEAD
             if(current_file->hdr.oscar_name_len[1] == ' ')
             {
                 
@@ -346,9 +345,6 @@ int __read_archive(int fd, char *file_name, struct Archive **archive)
                 current_file->hdr.oscar_name_len[0] = ' ';                    
             }
 
-=======
-            
->>>>>>> 1a55fff7cb4ccd5dde1c299eeb958c6c102d1ef7
             (*archive)->num_files++;
             
             int i_size = atoi(current_file->hdr.oscar_size);
