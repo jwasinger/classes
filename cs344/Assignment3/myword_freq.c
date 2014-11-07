@@ -15,17 +15,45 @@ void remove_non_alpha(char *str);
 void lower_str(char *str);
 void split_lines(char *str, char **out_lines, int *out_num_lines);
 int read_arg(char **out_str, char *arg);
-int read_all(char **out_str, int fd);
+int read_all(char **out_str, int *out_mem_size, int fd);
 
-int read_arg(char **out_str, char *arg)
+int read_all(char **out_str, int *out_mem_size, int fd)
+{
+    struct DynArr *dyn_arr = create_dyn_array(256, sizeof(char));
+    while((num_read = read(fd, read_buf, 256)) == 256)
+    {
+        for(i = 0; i < 256; i++)
+        {
+            add_dyn_array(dyn_arr, (void *)&read_buf[i]);
+        }
+    }
+
+    if(num_read == -1)
+    {
+        error = errno;
+        printf("read error(1): %s\n", strerror(error));
+    }
+    else //copy the last of what was read to the dynarr
+    {
+        for(i = 0; i < num_read; i++)
+        {
+            add_dyn_array(dyn_arr, (void *)&read_buf[i]);
+        }
+    }
+
+    *out_str = malloc(sizeof(char) * dyn_arr->size_array + 1);
+    memcpy(*out_str, dyn_arr->array, dyn_arr->size_array);
+    *out_str[dyn_arr->size_array] = '\0';
+    *out_mem_size = dyn_arr->size_array + 1;
+    free_dyn_array(&dyn_arr);
+}
+
+int read_arg(char **out_str, int *size_read, char *arg)
 {
     int res = 0;
     int fd = 0;
-    char read_buf[256];
-    int num_read = 0;
     int error = 0;
     int i = 0;
-    struct DynArr *dyn_arr = create_dyn_array(256,sizeof(char));
     
     res = open(arg, O_RDONLY, 0);
     if(res == -1)
@@ -43,31 +71,7 @@ int read_arg(char **out_str, char *arg)
     else
     {
         fd = res;
-        
-        while((num_read = read(fd, read_buf, 256)) == 256)
-        {
-            for(i = 0; i < 256; i++)
-            {
-                add_dyn_array(dyn_arr, (void *)&read_buf[i]);
-            }
-        }
-
-        if(num_read == -1)
-        {
-            error = errno;
-            printf("read error(1): %s\n", strerror(error));
-        }
-        else //copy the last of what was read to the dynarr
-        {
-            for(i = 0; i < num_read; i++)
-            {
-                add_dyn_array(dyn_arr, (void *)&read_buf[i]);
-            }
-        }
-
-        *out_str = malloc(sizeof(char) * dyn_arr->size_array);
-        memcpy(*out_str, dyn_arr->array, dyn_arr->size_array);
-        free_dyn_array(&dyn_arr);
+        read_all(out_str, size_read);        
     }
 
     return 0;
@@ -156,11 +160,23 @@ int main(int argc, char **argv)
         //pass out_str to the pipe
     } */
 
+    char *arg_str = NULL;
+    int arg_str_size = 0;
+    res = read_arg(&arg_str, &arg_str_size, argv[1]); 
+    if(res == -1)
+    {
+        return -1;
+    }
+    
     res = pipe(pfd);
     if(res == -1)
     {
         error = errno;
         printf("pipe error: %s\n", strerror(error));    
+    }
+    else if(res == 1)
+    {
+        arg_str = argv[1];
     }
 
     switch(fork())
