@@ -15,10 +15,10 @@ void remove_non_alpha(char *str);
 void lower_str(char *str);
 void split_lines(char *str, char **out_lines, int *out_num_lines);
 int read_arg(char **out_str, int *size_read, char *arg);
-int read_all(char **out_str, int *out_mem_size, int fd);
+int read_all(int fd, char **out_str, int *out_mem_size);
 
 //this function is buggy fasho
-int read_all(char **out_str, int *out_mem_size, int fd)
+int read_all(int fd, char **out_str, int *out_mem_size)
 {
     int num_read = 0;
     struct DynArr *dyn_arr = create_dyn_array(256, sizeof(char));
@@ -49,7 +49,7 @@ int read_all(char **out_str, int *out_mem_size, int fd)
 
     *out_str = malloc(sizeof(char) * dyn_arr->size_array + 1);
     memcpy(*out_str, dyn_arr->array, dyn_arr->size_array);
-    *out_str[dyn_arr->size_array] = '\0';
+    out_str[dyn_arr->size_array] = '\0';
     *out_mem_size = dyn_arr->size_array + 1;
     free_dyn_array(&dyn_arr);
 
@@ -77,7 +77,7 @@ int read_arg(char **out_str, int *size_read, char *arg)
     else
     {
         fd = res;
-        read_all(out_str, size_read, fd);        
+        read_all(fd, out_str, size_read);        
         return 0;
     }
 }
@@ -183,7 +183,6 @@ int main(int argc, char **argv)
     {
         //pass arg_str to the pipe
     }*/
-
     res = pipe(pfd);
     if(res == -1)
     {
@@ -191,126 +190,115 @@ int main(int argc, char **argv)
         printf("pipe error(1): %s\n", strerror(error));    
     }
 
+    //link end of 
     switch(fork())
     {
+        case -1:
+           /*error case*/
+           error = errno;
+           printf("fork error(1): %s\n", strerror(error));
+           break;
+        
         case 0:
-            /* child process */
-            
-            /*
-            //close read file descriptor
-            res = close(pfd[0]);
-            if(res == -1)
-            {
-                error = errno;
-                printf("error, close(1): %s\n", strerror(error));
-            }
-            */
-            
-            //read string from pipe, this should be output of removeNonAlpha
-            //pass string through lowerCase
-            
+            /*child case*/ 
+            //execute removeNonAlpha and pipe output to write descriptor of pfd
+            /*char *pipe_output = NULL;
+            int size_output = 0;
+            int size_written = 0;
 
-            if(pfd[1] != STDOUT_FILENO)
-            {
-                if(dup2(pfd[1], STDOUT_FILENO) == -1)
-                {
-                    error = errno;
-                    printf("error dup2(1): %s\n", strerror(error));
-                }
-                
-                if(close(pfd[1]) == -1)
-                {
-                    error = errno;
-                    printf("error close(2): %s\n", strerror(error));
-                }
-            }
-            
-            //remove_non_alpha( 
-            //execlp("ls", "ls", "-l", (char *)NULL); 
-            //printf("Parent!\npoop\n1sdfa\n");
-            
-            res = pipe(pfd2);
+            res = read_all(&pipe_output, &size_output, STDIN_FILENO);
             if(res == -1)
             {
-                error = errno;
-                printf("pipe error(2): %s\n", strerror(error));
+                return -1;
+            }*/
+
+            
+            res = write(pfd[1], (void *)str, 13);
+            if(res < 13)
+            {
                 return -1;
             }
             
-            switch(fork())
-            {
-                case -1:
-                    error = errno;
-                    printf("fork error(1): %s\n", strerror(error));
-                    break;
-                case 0: //child process
-                    
-                    //read string which should be output from lowerCase
-                    //execute splitLines on string
-                    //fork
-
-                    res = pipe(pfd3);
-                    if(res == -1)
-                    {
-                        error = errno;
-                        printf("pipe error(2): %s\n", strerror(error));
-                        return -1;
-                    }
-                    
-                    switch(fork())
-                    {
-                        case -1:
-                            break;
-                        case 0: //child process
-                            //read string which should be ouput from splitLines
-                            //execute sort on string
-
-                            res = pipe(pfd4);
-                            if(res == -1)
-                            {
-                                error = errno;
-                                printf("pipe error(3): %s\n", strerror(error));
-                                return -1;
-                            }
-                            
-
-                            switch(fork())
-                            {
-                                case -1:
-                                    
-                                    break;
-                                case 0:
-                                    //read string which should be output from sort
-                                    //execute uniq -c and print output
-                                    write(1, str, 14);
-                                    printf("asdfasdf");
-                                    char *a = NULL;
-
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-
-                    break;
-                default:
-                    break;
-            }
             break;
 
+        default:
+            /*parent case-- fall through*/ 
+            break;
+    }
+    
+    res = pipe(pfd2);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(2): %s\n", strerror(error));    
+        return -1;
+    }
+    
+    char *read_pfd = NULL;
+    int size_read_pfd = 0;
+    
+    switch(fork())
+    {
         case -1:
-            error = errno;
-            printf("fork error(1): %s\n", strerror(error));
-            break;
+            /*error case*/ 
+        case 0:
 
-        default: //parent, write
-            printf("parent!\n");
+
+            /*child case*/ 
+            //pass data from read descriptor of pfd to lowerCase
+            res = read_all(pfd[0], &read_pfd, &size_read_pfd);
+            
+            read_pfd[0] = 'a';
+            
+            //write the output to the write descriptor of pfd2
+            res = write(pfd2[1], read_pfd, size_read_pfd);
+        default:
+            /*parent case*/
+            break;
+    }
+    
+    char *pfd2_output = NULL;
+    int pfd2_output_len = 0;
+    res = read_all(pfd2[0], &pfd2_output, &pfd2_output_len); 
+    
+    printf(pfd2_output);
+
+    return 0;
+
+    res = pipe(pfd3);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(2): %s\n", strerror(error));    
+    }
+   
+    switch(fork())
+    {
+        case -1:
+            break;
+        case 0:
+            break;
+        default:
             break;
     }
 
+    res = pipe(pfd4);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(2): %s\n", strerror(error));    
+    }
+   
+    switch(fork())
+    {
+        case -1:
+            break;
+        case 0:
+            break;
+        default:
+            break;
+    }
+    
     /*switch(fork())
     {
         case -1:
