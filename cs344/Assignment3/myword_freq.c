@@ -150,44 +150,45 @@ int main(int argc, char **argv)
     int pfd3[2];
     int pfd4[2];
     
-    //try and open the first command line argument as a file, if that fails, pass it as text
-    /*if(argc < 2)
-    {
-        printf("not enough arguments supplied.... exiting\n");
-        return -1;
-    }
-    
-    res = read_arg(&out_str, argv[1]);
-    if(res == 1)
-    {
-        //pass argv[1] to the pipe
-    }
-    else if (res == 0)
-    {
-        //pass out_str to the pipe
-    } */
-    
     char *str = "hello world\n";
     char *arg_str = NULL;
     int arg_str_size = 0;
-    /*res = read_arg(&arg_str, &arg_str_size, argv[1]); 
-    if(res == -1)
-    {
-        return -1;
-    }
-    else if(res == 1)
-    {
-        //pass input from stdin to the pipe
-    }
-    else
-    {
-        //pass arg_str to the pipe
-    }*/
+    
     res = pipe(pfd);
     if(res == -1)
     {
         error = errno;
         printf("pipe error(1): %s\n", strerror(error));    
+    }
+    
+    res = pipe(pfd2);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(2): %s\n", strerror(error));    
+        return -1;
+    }
+    
+    res = pipe(pfd3);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(3): %s\n", strerror(error));    
+    }
+   
+    res = pipe(pfd4);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(4): %s\n", strerror(error));    
+        return -1;
+    }
+    
+    res = pipe(pfd5);
+    if(res == -1)
+    {
+        error = errno;
+        printf("pipe error(5): %s\n", strerror(error));    
     }
 
     //link end of 
@@ -200,19 +201,6 @@ int main(int argc, char **argv)
            break;
         
         case 0:
-            /*child case*/ 
-            //execute removeNonAlpha and pipe output to write descriptor of pfd
-            /*char *pipe_output = NULL;
-            int size_output = 0;
-            int size_written = 0;
-
-            res = read_all(&pipe_output, &size_output, STDIN_FILENO);
-            if(res == -1)
-            {
-                return -1;
-            }*/
-
-            
             res = write(pfd[1], (void *)str, 13);
             if(res < 13)
             {
@@ -225,14 +213,7 @@ int main(int argc, char **argv)
             /*parent case-- fall through*/ 
             break;
     }
-    
-    res = pipe(pfd2);
-    if(res == -1)
-    {
-        error = errno;
-        printf("pipe error(2): %s\n", strerror(error));    
-        return -1;
-    }
+
     
     char *read_pfd = NULL;
     int size_read_pfd = 0;
@@ -260,38 +241,24 @@ int main(int argc, char **argv)
     char *pfd2_output = NULL;
     int pfd2_output_len = 0;
     res = read_all(pfd2[0], &pfd2_output, &pfd2_output_len); 
-    
-    printf(pfd2_output);
 
-    return 0;
-
-    res = pipe(pfd3);
-    if(res == -1)
-    {
-        error = errno;
-        printf("pipe error(2): %s\n", strerror(error));    
-    }
-   
     switch(fork())
     {
         case -1:
+            error = errno;
+            printf("Fork error(3): %s\n", strerror(error));
             break;
         case 0:
             break;
         default:
             break;
     }
-
-    res = pipe(pfd4);
-    if(res == -1)
-    {
-        error = errno;
-        printf("pipe error(2): %s\n", strerror(error));    
-    }
-   
+    
     switch(fork())
     {
         case -1:
+            error = errno;
+            printf("Fork error(3): %s\n", strerror(error));
             break;
         case 0:
             break;
