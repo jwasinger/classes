@@ -7,6 +7,8 @@
 #include <ctype.h>
 #include <error.h>
 #include <errno.h>
+#include <sys/wait.h>
+
 #include "DynArr.h"
 
 void remove_non_alpha(char *str);
@@ -297,7 +299,7 @@ int main(int argc, char **argv)
         case 0:
             //read from pfd3, call sort on what is read, pass the result of sort to write descriptor of pfd3 
             res = read_all(pfd3[0], &read_pfd, &size_read_pfd);
-            if(res == -1 || size_read_pfd)
+            if(res == -1)
             {
                 return -1;
             }
@@ -315,6 +317,10 @@ int main(int argc, char **argv)
             break;
         default:
             wait(&status);
+            if(!WIFEXITED(status))
+            {
+                return -1;
+            }
             break;
     }
     
@@ -326,14 +332,28 @@ int main(int argc, char **argv)
             break;
         case 0:
             //read from pfd3, call sort on what is read, pass the result of sort to write descriptor of pfd4 
-            res = read_all(pfd4[0], &read_pfd, &size_read_pfd);
+            /*res = read_all(pfd4[0], &read_pfd, &size_read_pfd);
             if(res == -1 )
             {
                 return -1;
-            }
+            }*/
            
             //call sort()
-            execlp("sort", "sort", read_pfd, (char *)NULL);
+            res = dup2(pfd4[0], STDIN_FILENO);
+            if (res == -1)
+            {
+                return -1;
+            }
+            //close(pfd4[0]);
+
+            res = dup2(pfd5[1], STDOUT_FILENO);
+            if (res == -1)
+            {
+                return -1;
+            }
+            //close(pfd5[1]);
+
+            execlp("sort", "sort", (char *)NULL);
 
             //write the output to the write descriptor of pfd2
             res = write(pfd5[1], read_pfd, size_read_pfd);
@@ -346,6 +366,10 @@ int main(int argc, char **argv)
             break;
         default:
             wait(&status);
+            if(!WIFEXITED(status))
+            {
+                return -1;
+            }
             break;
     }
     
