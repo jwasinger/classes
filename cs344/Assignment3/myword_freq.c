@@ -22,7 +22,6 @@ int read_arg(char **out_str, int *size_read, char *arg)
     int res = 0;
     int error = 0;
     int fd = 0;
-    int *stage = malloc(sizeof(int));
 
     res = open(arg, O_RDONLY, 0);
     if(res == -1)
@@ -162,7 +161,9 @@ int main(int argc, char **argv)
         printf("pipe error(4): %s\n", strerror(error));    
         return -1;
     }
-    
+
+
+
     res = pipe2(pfd5, O_NONBLOCK);
     if(res == -1)
     {
@@ -215,6 +216,7 @@ int main(int argc, char **argv)
         case 0: //child case: execute remove_non_alpha and send result to pfd write end
             remove_non_alpha(arg_str);
 
+            
             res = write(pfd[1], arg_str, arg_str_size);
             if(res != arg_str_size)
             {
@@ -273,6 +275,7 @@ int main(int argc, char **argv)
             {
                 return -1;
             }
+
             
             split_lines(read_pfd);
             
@@ -305,7 +308,7 @@ int main(int argc, char **argv)
             }
             
             split_lines(read_pfd);
-            
+    
             //write the output to the write descriptor of pfd2
             res = write(pfd4[1], read_pfd, size_read_pfd);
             if(res == -1)
@@ -344,14 +347,18 @@ int main(int argc, char **argv)
             {
                 return -1;
             }
-            //close(pfd4[0]);
+            close(pfd4[0]);
 
             res = dup2(pfd5[1], STDOUT_FILENO);
             if (res == -1)
             {
                 return -1;
             }
-            //close(pfd5[1]);
+            close(pfd5[1]);
+            
+            char *pstr = NULL;
+            int size_pstr = 0;
+            res = read_all(STDIN_FILENO, &pstr, &size_pstr);
 
             execlp("sort", "sort", (char *)NULL);
 
