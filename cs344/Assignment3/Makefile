@@ -23,9 +23,9 @@ all: dynarr myword_freq
 	mkdir -p $(OUTPUT_DIR)
 	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GCC_FLAGS) myword_freq.o DynArr.o 
 
-test: dynarr fork_test
+test: fork_test
 	mkdir -p $(OUTPUT_DIR)
-	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GCC_FLAGS) fork_test.o DynArr.o
+	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GCC_FLAGS) fork_test.o
 
 clean:
 	rm -rf $(OUTPUT_DIR)
