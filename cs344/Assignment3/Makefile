@@ -15,10 +15,10 @@ myword_freq:
 dynarr:
 	$(CC) -c -o DynArr.o $(GCC_FLAGS) -g DynArr.c
 
-all: dynarr myword_freq  
+all: myword_freq  
 
 	mkdir -p $(OUTPUT_DIR)
-	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GCC_FLAGS) myword_freq.o DynArr.o 
+	$(CC) -o $(OUTPUT_DIR)/$(TARGET) $(GCC_FLAGS) myword_freq.o 
 
 clean:
 	rm -rf $(OUTPUT_DIR)
