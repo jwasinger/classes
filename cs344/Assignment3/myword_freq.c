@@ -1,14 +1,3 @@
-/*#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <error.h>
-#include <errno.h>
-#include <sys/wait.h>
-#include <stdio.h>*/
 #include <sys/wait.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -27,7 +16,8 @@
 
 int main(int argc, char *argv[])
 {
-
+    printf("press enter and then ctrl-d after done writing input to perform word frequency check\n");
+    
     int res = 0;
     int pfd[2];
     int pfd2[2];
