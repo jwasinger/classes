@@ -58,12 +58,12 @@ int get_ip_from_hostname(char *host, char **output, int ip_v6)
     }
 
     if(ip_v6 != 0)
-        addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+        addr6 = ((struct sockaddr_in *)(res->ai_addr));
     else
         addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
 
     if(ip_v6 != 0)
-        inet_ntop(AF_INET6, &addr, *output, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &addr6, *output, INET6_ADDRSTRLEN);
     else
         inet_ntop(AF_INET, &addr, *output, INET_ADDRSTRLEN);
 
