@@ -166,7 +166,7 @@ int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
     hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
     hints.ai_socktype = SOCK_STREAM;
 
-    if(!ip_v4 || !ip_v6)
+    if(!*ip_v4 || !*ip_v6)
     {
         printf("invalid args\n");
         return -1;
@@ -177,9 +177,6 @@ int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
         return -1;
     }
 
-    *ip_v4 = malloc(NAME_SIZE);
-    *ip_v6 = malloc(NAME_SIZE);
-    
     for(p = res;p != NULL; p = p->ai_next) 
     {
         // get the pointer to the address itself,
@@ -350,7 +347,9 @@ int main(int argc, char **argv)
         }
         else if(strncmp(read_buf, CMD_SHOW, 4) == 0)
         {
-            printf("exit1");
+            res = show_rows();
+            if(res == -1)
+                return -1;
         }
         else if(strncmp(read_buf, CMD_SAVE, 4) == 0)
         {
