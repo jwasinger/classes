@@ -8,7 +8,11 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <stdlib.h>
+
+#include <sys/socket.h>
+#include <netdb.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include "provided_materials/ipdb.h"
 
@@ -26,14 +30,14 @@ struct shm_db_hdr
 int SHM_SIZE = sizeof(struct shm_db_hdr)+sizeof(ip_row_t)*MAX_ROWS;
 
 int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE]);
-int init_shm_db(int *addr);
+int init_shm_db(int **addr);
 int add_entry(char *host);
 void print_row(const ip_row_t *row);
 int show_rows(void);
 
 static struct shm_db_hdr *hdr = NULL;
 static void *data_addr = NULL;
-void *shm_addr = NULL;
+int *shm_addr = NULL;
 
 void print_row(const ip_row_t *row)
 {
@@ -119,7 +123,7 @@ int init_shm_db(int **addr)
 
     //map address and set up the header struct
     *addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if(addr == MAP_FAILED)
+    if(*addr == MAP_FAILED)
     {
         error = errno;
         printf("error mapping shared memory: %s\n", strerror(error));
@@ -134,7 +138,7 @@ int init_shm_db(int **addr)
         int num_rows;
     };
 
-    hdr = (struct shm_db_hdr *)addr;
+    hdr = (struct shm_db_hdr *)*addr;
     
     res = sem_init(&hdr->db_lock, 1, 1);
     if(res == -1)
@@ -152,14 +156,55 @@ int init_shm_db(int **addr)
 
 int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
 {
+    struct addrinfo hints, *res, *p;
+    int status;
+    void *addr;
+    struct sockaddr_in *ipv4 = NULL;
+    struct sockaddr_in6 *ipv6 = NULL;
+    
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+    hints.ai_socktype = SOCK_STREAM;
+
     if(!ip_v4 || !ip_v6)
     {
         printf("invalid args\n");
         return -1;
     }
+    
+    if ((status = getaddrinfo(host, NULL, &hints, &res)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+        return -1;
+    }
 
     *ip_v4 = malloc(NAME_SIZE);
     *ip_v6 = malloc(NAME_SIZE);
+    
+    for(p = res;p != NULL; p = p->ai_next) 
+    {
+        // get the pointer to the address itself,
+        // different fields in IPv4 and IPv6:
+        if (p->ai_family == AF_INET) 
+        { // IPv4
+            if(ipv4 != NULL)
+                continue;
+            ipv4 = (struct sockaddr_in *)p->ai_addr;
+            addr = &(ipv4->sin_addr);
+            inet_ntop(p->ai_family, addr, *ip_v4, NAME_SIZE);
+        } 
+        else 
+        { // IPv6
+            if(ipv6 != NULL)
+                continue;
+            ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+            addr = &(ipv6->sin6_addr);
+            inet_ntop(p->ai_family, addr, *ip_v6, NAME_SIZE);
+        }
+
+        if(ipv4 && ipv6)
+            break;
+    }
+
     return 0;
 }
 
@@ -234,7 +279,6 @@ int main(int argc, char **argv)
     int fd = -1;
     int i = 0;
     char *host = NULL;
-    void *addr = NULL;
 
     memset(read_buf, 0, BUF_SIZE);
     
@@ -242,25 +286,25 @@ int main(int argc, char **argv)
     fd = shm_open(SHM_NAME, O_RDWR, 0);
     if(fd == -1 && errno == ENOENT)
     {
-        res = init_shm_db((int *)&shm_addr);
+        res = init_shm_db(&shm_addr);
         if(res == -1)
             return -1;
 
         hdr = (struct shm_db_hdr *)shm_addr;
-        data_addr = (int *)addr + sizeof(struct shm_db_hdr);
+        data_addr = (int *)shm_addr + sizeof(struct shm_db_hdr);
     }
     else
     {
-        addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-        if(addr == MAP_FAILED)
+        shm_addr = (int *)mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if(shm_addr == MAP_FAILED)
         {
             error = errno;
             printf("error mapping shared memory: %s\n", strerror(error));
             return -1;
         }
         
-        hdr = (struct shm_db_hdr *)addr;
-        data_addr = (int *)addr + sizeof(struct shm_db_hdr);
+        hdr = (struct shm_db_hdr *)shm_addr;
+        data_addr = (int *)shm_addr + sizeof(struct shm_db_hdr);
     }   
     
     while(1)
