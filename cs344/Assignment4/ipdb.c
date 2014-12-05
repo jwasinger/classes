@@ -17,10 +17,10 @@
 
 struct shm_db_hdr 
 {
-	sem_t db_lock;
-	//int db_locked;
-	int db_size;
-	int num_rows;
+    sem_t db_lock;
+    //int db_locked;
+    int db_size;
+    int num_rows;
 };
 
 int SHM_SIZE = sizeof(struct shm_db_hdr)+sizeof(ip_row_t)*MAX_ROWS;
@@ -37,317 +37,317 @@ void *shm_addr = NULL;
 
 void print_row(const ip_row_t *row)
 {
-	printf("Name: %s\n", row->row_name);
-	printf("Ipv6: %s\n", row->row_address6);
-	printf("Ipv4: %s\n\n", row->row_address4);
+    printf("Name: %s\n", row->row_name);
+    printf("Ipv6: %s\n", row->row_address6);
+    printf("Ipv4: %s\n\n", row->row_address4);
 }
 
 int show_rows(void)
 {
-	int i = 0;
-	int error = 0;
-	int res = 0;
-	int num_rows = 0;
-	ip_row_t *row;
+    int i = 0;
+    int error = 0;
+    int res = 0;
+    int num_rows = 0;
+    ip_row_t *row;
 
-	/*res = sem_wait(&hdr->db_lock);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_wait error: %s\n", strerror(error));
-		return -1;
-	}*/
+    /*res = sem_wait(&hdr->db_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_wait error: %s\n", strerror(error));
+        return -1;
+    }*/
 
-	num_rows = hdr->num_rows;
+    num_rows = hdr->num_rows;
 
-	/*res = sem_post(&hdr->db_lock);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_post error: %s\n", strerror(error));
-		return -1;
-	}*/
+    /*res = sem_post(&hdr->db_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_post error: %s\n", strerror(error));
+        return -1;
+    }*/
 
-	for(i = 0; i < num_rows; i++)
-	{
-		row = (ip_row_t *)((int *)data_addr + num_rows*sizeof(ip_row_t));
+    for(i = 0; i < num_rows; i++)
+    {
+        row = (ip_row_t *)((int *)data_addr + num_rows*sizeof(ip_row_t));
 
-		res = sem_wait(&row->row_lock);
-		if(res == -1)
-		{
-			error = errno;
-			printf("sem_wait error: %s\n", strerror(error));
-			return -1;
-		}
+        res = sem_wait(&row->row_lock);
+        if(res == -1)
+        {
+            error = errno;
+            printf("sem_wait error: %s\n", strerror(error));
+            return -1;
+        }
 
-		print_row(row);
+        print_row(row);
 
-		res = sem_post(&row->row_lock);
-		if(res == -1)
-		{
-			error = errno;
-			printf("sem_post error: %s\n", strerror(error));
-			return -1;
-		}
-	}
+        res = sem_post(&row->row_lock);
+        if(res == -1)
+        {
+            error = errno;
+            printf("sem_post error: %s\n", strerror(error));
+            return -1;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 int init_shm_db(int **addr)
 {
-	int fd = -1;
-	int res = 0;
-	int error;
-	struct shm_db_hdr *hdr;
-	
-	fd = shm_open(SHM_NAME, O_RDWR | O_CREAT, 0666);
-	if(fd == -1)
-	{
-		error = errno;
-		printf("shm_open error: %s", strerror(error));
-		return -1;
-	}
+    int fd = -1;
+    int res = 0;
+    int error;
+    struct shm_db_hdr *hdr;
+    
+    fd = shm_open(SHM_NAME, O_RDWR | O_CREAT, 0666);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("shm_open error: %s", strerror(error));
+        return -1;
+    }
 
-	res = ftruncate(fd, SHM_SIZE);
-	if(res == -1)
-	{
-		error = errno;
-		printf("ftruncate error: %s\n", strerror(error));
-		return -1;
-	}
+    res = ftruncate(fd, SHM_SIZE);
+    if(res == -1)
+    {
+        error = errno;
+        printf("ftruncate error: %s\n", strerror(error));
+        return -1;
+    }
 
-	//map address and set up the header struct
-	*addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if(addr == MAP_FAILED)
-	{
-		error = errno;
-		printf("error mapping shared memory: %s\n", strerror(error));
-		return -1;
-	}
+    //map address and set up the header struct
+    *addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if(addr == MAP_FAILED)
+    {
+        error = errno;
+        printf("error mapping shared memory: %s\n", strerror(error));
+        return -1;
+    }
 
-	struct shm_db_hdr 
-	{
-		sem_t db_lock;
-		//int db_locked;
-		int db_size;
-		int num_rows;
-	};
+    struct shm_db_hdr 
+    {
+        sem_t db_lock;
+        //int db_locked;
+        int db_size;
+        int num_rows;
+    };
 
-	hdr = (struct shm_db_hdr *)addr;
-	
-	res = sem_init(&hdr->db_lock, 1, 1);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_init error: %s\n", strerror(error));
-		return -1;
-	}
+    hdr = (struct shm_db_hdr *)addr;
+    
+    res = sem_init(&hdr->db_lock, 1, 1);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_init error: %s\n", strerror(error));
+        return -1;
+    }
 
-	hdr->db_size = 0;
-	hdr->num_rows = 0;
+    hdr->db_size = 0;
+    hdr->num_rows = 0;
 
-	return 0;
+    return 0;
 }
 
 int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
 {
-	if(!ip_v4 || !ip_v6)
-	{
-		printf("invalid args\n");
-		return -1;
-	}
+    if(!ip_v4 || !ip_v6)
+    {
+        printf("invalid args\n");
+        return -1;
+    }
 
-	*ip_v4 = malloc(NAME_SIZE);
-	*ip_v6 = malloc(NAME_SIZE);
-	return 0;
+    *ip_v4 = malloc(NAME_SIZE);
+    *ip_v6 = malloc(NAME_SIZE);
+    return 0;
 }
 
 int add_entry(char *host)
 {
-	int res = 0;
-	int *addr = (int *)data_addr;
-	ip_row_t *last_row;
-	int num_rows = 0;
-	int error = 0;
+    int res = 0;
+    int *addr = (int *)data_addr;
+    ip_row_t *last_row;
+    int num_rows = 0;
+    int error = 0;
 
-	char ip_v4[NAME_SIZE];
-	char ip_v6[NAME_SIZE];
+    char ip_v4[NAME_SIZE];
+    char ip_v6[NAME_SIZE];
 
-	res = sem_wait(&hdr->db_lock);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_wait error: %s\n", strerror(error));
-		return -1;
-	}
+    res = sem_wait(&hdr->db_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_wait error: %s\n", strerror(error));
+        return -1;
+    }
 
-	/*if(hdr->db_locked)
-	{
-		sem_post(&hdr->db_lock);
-		return 1;
-	}*/
+    /*if(hdr->db_locked)
+    {
+        sem_post(&hdr->db_lock);
+        return 1;
+    }*/
 
-	res = get_ip_strs(host, &ip_v4, &ip_v6);
-	if(res == -1)
-	{
-		errno = error;
-		printf("get_ip_strs error: %s\n", strerror(error));
-		return -1;
-	}
+    res = get_ip_strs(host, &ip_v4, &ip_v6);
+    if(res == -1)
+    {
+        errno = error;
+        printf("get_ip_strs error: %s\n", strerror(error));
+        return -1;
+    }
 
-	num_rows = hdr->num_rows;
-	hdr->num_rows++;
-	sem_post(&hdr->db_lock);
-	
-	last_row = (ip_row_t *)(addr + num_rows*sizeof(ip_row_t));
-	memset(last_row, 0, sizeof(ip_row_t));
+    num_rows = hdr->num_rows;
+    hdr->num_rows++;
+    sem_post(&hdr->db_lock);
+    
+    last_row = (ip_row_t *)(addr + num_rows*sizeof(ip_row_t));
+    memset(last_row, 0, sizeof(ip_row_t));
 
-	res = sem_init(&last_row->row_lock, 1, 0);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_init error: %s\n", strerror(error));
-		return -1;
-	}
+    res = sem_init(&last_row->row_lock, 1, 0);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_init error: %s\n", strerror(error));
+        return -1;
+    }
 
-	strncpy(last_row->row_name, host, NAME_SIZE);
-	strncpy(last_row->row_address4, ip_v4, NAME_SIZE);
-	strncpy(last_row->row_address6, ip_v6, NAME_SIZE);
+    strncpy(last_row->row_name, host, NAME_SIZE);
+    strncpy(last_row->row_address4, ip_v4, NAME_SIZE);
+    strncpy(last_row->row_address6, ip_v6, NAME_SIZE);
 
-	res = sem_post(&last_row->row_lock);
-	if(res == -1)
-	{
-		error = errno;
-		printf("sem_post error: %s\n", strerror(error));
-		return -1;
-	}
+    res = sem_post(&last_row->row_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_post error: %s\n", strerror(error));
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 int main(int argc, char **argv)
 {
-	int error = 0;
-	int res = 0;
-	char read_buf[BUF_SIZE];
-	int fd = -1;
-	int i = 0;
-	char *host = NULL;
-	void *addr = NULL;
+    int error = 0;
+    int res = 0;
+    char read_buf[BUF_SIZE];
+    int fd = -1;
+    int i = 0;
+    char *host = NULL;
+    void *addr = NULL;
 
-	memset(read_buf, 0, BUF_SIZE);
-	
-	//try and open the shm, if it doesn't exist create it and initiallize its state
-	fd = shm_open(SHM_NAME, O_RDWR, 0);
-	if(fd == -1 && errno == ENOENT)
-	{
-		res = init_shm_db((int *)&shm_addr);
-		if(res == -1)
-			return -1;
+    memset(read_buf, 0, BUF_SIZE);
+    
+    //try and open the shm, if it doesn't exist create it and initiallize its state
+    fd = shm_open(SHM_NAME, O_RDWR, 0);
+    if(fd == -1 && errno == ENOENT)
+    {
+        res = init_shm_db((int *)&shm_addr);
+        if(res == -1)
+            return -1;
 
-		hdr = (struct shm_db_hdr *)shm_addr;
-		data_addr = (int *)addr + sizeof(struct shm_db_hdr);
-	}
-	else
-	{
-		addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-		if(addr == MAP_FAILED)
-		{
-			error = errno;
-			printf("error mapping shared memory: %s\n", strerror(error));
-			return -1;
-		}
-		
-		hdr = (struct shm_db_hdr *)addr;
-		data_addr = (int *)addr + sizeof(struct shm_db_hdr);
-	}	
-	
-	while(1)
-	{
-		//read from command line
-		res = fgets(read_buf, BUF_SIZE, stdin);
-		if(res == NULL)
-		{
-			printf("error");
-			exit(-1);
-		}
-		else
-		{
-			for(i = 0; i < strlen(read_buf); i++)
-			{
-				if(read_buf[i] == '\n')
-				{
-					read_buf[i] = '\0';
-					break;
-				}
-			}
-		}
+        hdr = (struct shm_db_hdr *)shm_addr;
+        data_addr = (int *)addr + sizeof(struct shm_db_hdr);
+    }
+    else
+    {
+        addr = mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if(addr == MAP_FAILED)
+        {
+            error = errno;
+            printf("error mapping shared memory: %s\n", strerror(error));
+            return -1;
+        }
+        
+        hdr = (struct shm_db_hdr *)addr;
+        data_addr = (int *)addr + sizeof(struct shm_db_hdr);
+    }   
+    
+    while(1)
+    {
+        //read from command line
+        res = fgets(read_buf, BUF_SIZE, stdin);
+        if(res == NULL)
+        {
+            printf("error");
+            exit(-1);
+        }
+        else
+        {
+            for(i = 0; i < strlen(read_buf); i++)
+            {
+                if(read_buf[i] == '\n')
+                {
+                    read_buf[i] = '\0';
+                    break;
+                }
+            }
+        }
 
-		//execute command
-		if(strncmp(read_buf, CMD_HELP, 4) == 0)
-		{
-			printf("help1");
-		}
-		else if(strncmp(read_buf, CMD_EXIT, 4) == 0)
-		{
-			break;
-		}
-		else if(strncmp(read_buf, CMD_FETCH, 5) == 0)
-		{
-			host = read_buf + 6;
-			res = add_entry(host);
-			if(res == -1)
-				break;
-		}
-		if(strncmp(read_buf, CMD_CHECK, 5) == 0)
-		{
-			printf("help1");
-		}
-		else if(strncmp(read_buf, CMD_SHOW, 4) == 0)
-		{
-			printf("exit1");
-		}
-		else if(strncmp(read_buf, CMD_SAVE, 4) == 0)
-		{
-			printf("fetch1");
-		}
-		if(strncmp(read_buf, CMD_LOAD, 4) == 0)
-		{
-			printf("help1");
-		}
-		else if(strncmp(read_buf, CMD_CLEAR, 5) == 0)
-		{
-			printf("exit1");
-		}
-		else if(strncmp(read_buf, CMD_LOCK_TABLE, 10) == 0)
-		{
-			printf("fetch1");
-		}
-		if(strncmp(read_buf, CMD_UNLOCK_TABLE, 12) == 0)
-		{
-			printf("help1");
-		}
-		else if(strncmp(read_buf, CMD_LOCK_ROW, 8) == 0)
-		{
-			printf("exit1");
-		}
-		else if(strncmp(read_buf, CMD_UNLOCK_ROW, 10) == 0)
-		{
-			printf("fetch1");
-		}
+        //execute command
+        if(strncmp(read_buf, CMD_HELP, 4) == 0)
+        {
+            printf("help1");
+        }
+        else if(strncmp(read_buf, CMD_EXIT, 4) == 0)
+        {
+            break;
+        }
+        else if(strncmp(read_buf, CMD_FETCH, 5) == 0)
+        {
+            host = read_buf + 6;
+            res = add_entry(host);
+            if(res == -1)
+                break;
+        }
+        if(strncmp(read_buf, CMD_CHECK, 5) == 0)
+        {
+            printf("help1");
+        }
+        else if(strncmp(read_buf, CMD_SHOW, 4) == 0)
+        {
+            printf("exit1");
+        }
+        else if(strncmp(read_buf, CMD_SAVE, 4) == 0)
+        {
+            printf("fetch1");
+        }
+        if(strncmp(read_buf, CMD_LOAD, 4) == 0)
+        {
+            printf("help1");
+        }
+        else if(strncmp(read_buf, CMD_CLEAR, 5) == 0)
+        {
+            printf("exit1");
+        }
+        else if(strncmp(read_buf, CMD_LOCK_TABLE, 10) == 0)
+        {
+            printf("fetch1");
+        }
+        if(strncmp(read_buf, CMD_UNLOCK_TABLE, 12) == 0)
+        {
+            printf("help1");
+        }
+        else if(strncmp(read_buf, CMD_LOCK_ROW, 8) == 0)
+        {
+            printf("exit1");
+        }
+        else if(strncmp(read_buf, CMD_UNLOCK_ROW, 10) == 0)
+        {
+            printf("fetch1");
+        }
 
-		memset(read_buf, 0, BUF_SIZE);
-	}
+        memset(read_buf, 0, BUF_SIZE);
+    }
 
-	res = shm_unlink(SHM_NAME);
-	if(res == -1)
-	{
-		error = errno;
-		printf("shm_unlink error on %s: %s\n", SHM_NAME, strerror(error));
-		return -1;
-	}
-	//do cleanup operations here
+    res = shm_unlink(SHM_NAME);
+    if(res == -1)
+    {
+        error = errno;
+        printf("shm_unlink error on %s: %s\n", SHM_NAME, strerror(error));
+        return -1;
+    }
+    //do cleanup operations here
 
-	return 0;
+    return 0;
 }
