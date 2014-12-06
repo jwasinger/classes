@@ -29,7 +29,7 @@ struct shm_db_hdr
 
 int SHM_SIZE = sizeof(struct shm_db_hdr)+sizeof(ip_row_t)*MAX_ROWS;
 
-int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE]);
+int get_ip_strs(char *host, char *ip_v4, char *ip_v6);
 int init_shm_db(int **addr);
 int add_entry(char *host);
 void print_row(const ip_row_t *row);
@@ -154,7 +154,7 @@ int init_shm_db(int **addr)
     return 0;
 }
 
-int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
+int get_ip_strs(char *host, char *ip_v4, char *ip_v6)
 {
     struct addrinfo hints, *res, *p;
     int status;
@@ -187,7 +187,7 @@ int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
                 continue;
             ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
-            inet_ntop(p->ai_family, addr, *ip_v4, NAME_SIZE);
+            inet_ntop(p->ai_family, addr, ip_v4, NAME_SIZE);
         } 
         else 
         { // IPv6
@@ -195,7 +195,7 @@ int get_ip_strs(char *host, char *ip_v4[NAME_SIZE], char *ip_v6[NAME_SIZE])
                 continue;
             ipv6 = (struct sockaddr_in6 *)p->ai_addr;
             addr = &(ipv6->sin6_addr);
-            inet_ntop(p->ai_family, addr, *ip_v6, NAME_SIZE);
+            inet_ntop(p->ai_family, addr, ip_v6, NAME_SIZE);
         }
 
         if(ipv4 && ipv6)
@@ -230,7 +230,7 @@ int add_entry(char *host)
         return 1;
     }*/
 
-    res = get_ip_strs(host, &ip_v4, &ip_v6);
+    res = get_ip_strs(host, ip_v4, ip_v6);
     if(res == -1)
     {
         errno = error;
