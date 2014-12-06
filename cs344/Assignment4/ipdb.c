@@ -22,7 +22,7 @@
 struct shm_db_hdr 
 {
     sem_t db_lock;
-    //int db_locked;
+    int db_locked;
     int db_size;
     int num_rows;
 };
@@ -38,9 +38,125 @@ int check(char *host);
 int save(char *destination);
 int load(char *source);
 
+int lock_row(char *host);
+int unlock_row(char *host);
+
+int lock_table(void);
+int unlock_table(void);
+
 static struct shm_db_hdr *hdr = NULL;
 static void *data_addr = NULL;
 int *shm_addr = NULL;
+
+int lock_table(void)
+{
+    int res = 0;
+    int error = 0;
+
+    res = sem_trywait(&hdr->db_lock);
+    if(res == -1)
+    {
+        if(errno == EAGAIN)
+            return 1; //table already locked
+        else
+        {
+            error = errno;
+            printf("sem_trywait error: %s\n", strerror(error));
+            return -1;
+        }
+    }
+
+    hdr->db_locked = 1;
+    return 0;
+}
+
+int unlock_table(void)
+{
+    int res = 0;
+    int error = 0;
+
+    res = sem_post(&hdr->db_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_post error: %s\n", strerror(error));
+        return -1;
+    }   
+
+    hdr->db_locked = 0;
+    return 0;
+}
+
+int lock_row(char *host)
+{
+    int res = 0;
+    int error = 0;
+    int i = 0;
+    ip_row_t *row = NULL;
+
+    for(i = 0; i < hdr->num_rows; i++)
+    {
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
+        if(strncmp(row->row_name, host, strlen(host)) == 0)
+        {
+            break;
+        }
+
+        if(i == hdr->num_rows -1)
+        {
+            printf("host not found\n");
+            return -1;
+        }
+    }
+
+    res = sem_trywait(&row->row_lock);
+    if(res == -1)
+    {
+        if(errno == EAGAIN)
+            return 1; //table already locked
+        else
+        {
+            error = errno;
+            printf("sem_trywait error: %s\n", strerror(error));
+            return -1;
+        }
+    }
+
+    return 0; 
+}
+
+int unlock_row(char *host)
+{
+    int res = 0;
+    int error = 0;
+    int i = 0;
+    ip_row_t *row = NULL;
+
+    for(i = 0; i < hdr->num_rows; i++)
+    {
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
+        if(strncmp(row->row_name, host, strlen(host)) == 0)
+        {
+            break;
+        }
+
+        if(i == hdr->num_rows -1)
+        {
+            printf("host not found\n");
+            return -1;
+        }
+    }
+
+    res = sem_post(&row->row_lock);
+    if(res == -1)
+    {
+        error = errno;
+        printf("sem_post error: %s\n", strerror(error));
+        return -1;
+    }   
+
+    return 0;
+}
 
 int check(char *host)
 {
@@ -257,6 +373,12 @@ int add_entry(char *host)
 
     char ip_v4[NAME_SIZE];
     char ip_v6[NAME_SIZE];
+
+    if(hdr->db_locked)
+    {
+        printf("can't add entries while the table is locked\n");
+        return 1;
+    }
 
     res = sem_wait(&hdr->db_lock);
     if(res == -1)
@@ -537,19 +659,29 @@ int main(int argc, char **argv)
         }
         else if(strncmp(read_buf, CMD_LOCK_TABLE, 10) == 0)
         {
-            printf("fetch1");
+            res = lock_table();
+            if(res == -1)
+                return -1;
         }
         if(strncmp(read_buf, CMD_UNLOCK_TABLE, 12) == 0)
         {
-            printf("help1");
+            res = unlock_table();
+            if(res == -1)
+                return -1;
         }
         else if(strncmp(read_buf, CMD_LOCK_ROW, 8) == 0)
         {
-            printf("exit1");
+            host = read_buf + 9;
+            res = lock_row(host);
+            if(res == -1)
+                return -1;
         }
         else if(strncmp(read_buf, CMD_UNLOCK_ROW, 10) == 0)
         {
-            printf("fetch1");
+            host = read_buf + 11;
+            res = unlock_row(host);
+            if(res == -1)
+                return -1;
         }
 
         memset(read_buf, 0, BUF_SIZE);

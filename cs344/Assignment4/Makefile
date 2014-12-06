@@ -1,5 +1,5 @@
 CC = gcc
-GCC_FLAGS = -pthread -Wall -Wshadow -Wunreachable-code -Wmissing-declarations -Wold-style-definition -Wmissing-prototypes -Wdeclaration-after-statement
+GCC_FLAGS = -pthread -Wall -Wshadow -Wunreachable-code -Wmissing-declarations -Wold-style-definition -Wmissing-prototypes -Wdeclaration-after-statement -pthread
 OUTPUT_DIR = ./bin
 
 IPDB_TARGET = ipdb
