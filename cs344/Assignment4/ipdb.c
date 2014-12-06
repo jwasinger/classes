@@ -50,8 +50,9 @@ int check(char *host)
 
     for(i = 0; i < hdr->num_rows; i++)
     {
-        row = data_addr + i*sizeof(ip_row_t);
-
+        //row = data_addr + i*sizeof(ip_row_t);
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
+        
         if(strncmp(host, row->row_name, strlen(host)) == 0)
         {
             res = sem_wait(&row->row_lock);
@@ -315,6 +316,7 @@ int save(char *destination)
     int error = 0;
     char line_str[NAME_SIZE+2];
     int i = 0;
+    int res = 0;
     ip_row_t *row = NULL;
 
     //if file already exists, return error
@@ -331,7 +333,7 @@ int save(char *destination)
 
     for(; i < hdr->num_rows; i++)
     {
-        row = (ip_row_t *) (data_addr + i*sizeof(ip_row_t));
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
         
         res = sem_wait(&row->row_lock);
         if(res == -1)
@@ -341,6 +343,7 @@ int save(char *destination)
             return -1;
         }
 
+        memset(line_str, 0, NAME_SIZE+2);
         sprintf(line_str, "%s\n", row->row_name);
 
         res = sem_post(&row->row_lock);
@@ -358,9 +361,9 @@ int save(char *destination)
             printf("write failure: %s\n", strerror(error));
             return -1;
         }
-
-        return 0;
     }
+
+    return 0;
 }   
 
 int load(char *source)
@@ -370,8 +373,9 @@ int load(char *source)
     int fd = -1;
     char *host = NULL;
     int res = 0;
+    int error = 0;
 
-    fd = open(destination, O_RDONLY, 0666);
+    fd = open(source, O_RDONLY, 0666);
     if(fd == -1)
     {
         error = errno;
@@ -401,6 +405,15 @@ int load(char *source)
             }
         }
 
+        for(i = 0; i < NAME_SIZE+1; i++)
+        {
+            if(line[i] == '\n')
+            {
+                line[i] = '\0';
+                break;
+            }
+        }
+
         host = line;
         res = add_entry(host);
         if(res == -1)
@@ -418,6 +431,7 @@ int main(int argc, char **argv)
     int fd = -1;
     int i = 0;
     char *host = NULL;
+    char *file = NULL;
 
     memset(read_buf, 0, BUF_SIZE);
     
@@ -505,11 +519,17 @@ int main(int argc, char **argv)
         }
         else if(strncmp(read_buf, CMD_SAVE, 4) == 0)
         {
-            printf("fetch1");
+            file = read_buf + 5;
+            res = save(file);
+            if(res == -1)
+                return -1;
         }
         if(strncmp(read_buf, CMD_LOAD, 4) == 0)
         {
-            printf("help1");
+            file = read_buf + 5;
+            res = load(file);
+            if(res == -1)
+                return -1;
         }
         else if(strncmp(read_buf, CMD_CLEAR, 5) == 0)
         {
