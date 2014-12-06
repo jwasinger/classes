@@ -34,10 +34,48 @@ int init_shm_db(int **addr);
 int add_entry(char *host);
 void print_row(const ip_row_t *row);
 int show_rows(void);
+int check(char *host);
+int save(char *destination);
+int load(char *source);
 
 static struct shm_db_hdr *hdr = NULL;
 static void *data_addr = NULL;
 int *shm_addr = NULL;
+
+int check(char *host)
+{
+    ip_row_t *row = NULL;
+    int i = 0;
+    int res = 0;
+
+    for(i = 0; i < hdr->num_rows; i++)
+    {
+        row = data_addr + i*sizeof(ip_row_t);
+
+        if(strncmp(host, row->row_name, strlen(host)) == 0)
+        {
+            res = sem_wait(&row->row_lock);
+            if(res == -1)
+            {
+                printf("sem_wait error");
+                return -1;
+            }
+
+            print_row(row);
+
+            res = sem_post(&row->row_lock);
+            if(res == -1)
+            {
+                printf("sem_post error\n");
+                return -1;
+            }
+
+            break;
+        }
+    }
+
+    return 0;
+}
 
 void print_row(const ip_row_t *row)
 {
@@ -74,7 +112,7 @@ int show_rows(void)
 
     for(i = 0; i < num_rows; i++)
     {
-        row = (ip_row_t *)((int *)data_addr + num_rows*sizeof(ip_row_t));
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
 
         res = sem_wait(&row->row_lock);
         if(res == -1)
@@ -166,11 +204,14 @@ int get_ip_strs(char *host, char *ip_v4, char *ip_v6)
     hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
     hints.ai_socktype = SOCK_STREAM;
 
-    if(!*ip_v4 || !*ip_v6)
+    if(!ip_v4 || !ip_v6)
     {
         printf("invalid args\n");
         return -1;
     }
+    
+    memset(ip_v4, 0, NAME_SIZE);
+    memset(ip_v6, 0, NAME_SIZE);
     
     if ((status = getaddrinfo(host, NULL, &hints, &res)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
@@ -242,7 +283,7 @@ int add_entry(char *host)
     hdr->num_rows++;
     sem_post(&hdr->db_lock);
     
-    last_row = (ip_row_t *)(addr + num_rows*sizeof(ip_row_t));
+    last_row = (ip_row_t *)(addr + (num_rows)*sizeof(ip_row_t));
     memset(last_row, 0, sizeof(ip_row_t));
 
     res = sem_init(&last_row->row_lock, 1, 0);
@@ -263,6 +304,107 @@ int add_entry(char *host)
         error = errno;
         printf("sem_post error: %s\n", strerror(error));
         return -1;
+    }
+
+    return 0;
+}
+
+int save(char *destination)
+{
+    int fd = -1;
+    int error = 0;
+    char line_str[NAME_SIZE+2];
+    int i = 0;
+    ip_row_t *row = NULL;
+
+    //if file already exists, return error
+    if(access(destination, F_OK) != -1)
+        return 1;
+
+    fd = open(destination, O_RDWR | O_CREAT, 0666);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("open() error: %s\n", strerror(error));
+        return -1;
+    }
+
+    for(; i < hdr->num_rows; i++)
+    {
+        row = (ip_row_t *) (data_addr + i*sizeof(ip_row_t));
+        
+        res = sem_wait(&row->row_lock);
+        if(res == -1)
+        {
+            error = errno;
+            printf("sem_wait failure: %s\n", strerror(error));
+            return -1;
+        }
+
+        sprintf(line_str, "%s\n", row->row_name);
+
+        res = sem_post(&row->row_lock);
+        if(res == -1)
+        {
+            error = errno;
+            printf("sem_post failure: %s\n", strerror(errno));
+            return -1;
+        }
+
+        res = write(fd, line_str, NAME_SIZE+1);
+        if(res == -1)
+        {
+            error = errno;
+            printf("write failure: %s\n", strerror(error));
+            return -1;
+        }
+
+        return 0;
+    }
+}   
+
+int load(char *source)
+{
+    char line[NAME_SIZE+1];
+    int i = 0;
+    int fd = -1;
+    char *host = NULL;
+    int res = 0;
+
+    fd = open(destination, O_RDONLY, 0666);
+    if(fd == -1)
+    {
+        error = errno;
+        printf("open error: %s\n", strerror(error));
+        return -1;
+    }
+
+    while(1)
+    {
+        res = read(fd, line, NAME_SIZE+1);
+        if(res < NAME_SIZE+1)
+        {
+            if(res <= -1)
+            {
+                error = errno;
+                printf("read error: %s\n", strerror(error));
+                return -1;
+            }
+            else if (res < NAME_SIZE+1 && res > 0)
+            {
+                printf("less bytes read than expected\n");
+                return -1;   
+            }
+            else
+            {
+                break; //EOF reached
+            }
+        }
+
+        host = line;
+        res = add_entry(host);
+        if(res == -1)
+            return -1;
     }
 
     return 0;
@@ -292,6 +434,13 @@ int main(int argc, char **argv)
     }
     else
     {
+        res = ftruncate(fd, SHM_SIZE);
+        if(res == -1)
+        {
+            printf("ftruncate() failed\n");
+            return -1;
+        }
+
         shm_addr = (int *)mmap(NULL, SHM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if(shm_addr == MAP_FAILED)
         {
@@ -343,7 +492,10 @@ int main(int argc, char **argv)
         }
         if(strncmp(read_buf, CMD_CHECK, 5) == 0)
         {
-            printf("help1");
+            host = read_buf + 6;
+            res = check(host);
+            if(res == -1)
+                break;
         }
         else if(strncmp(read_buf, CMD_SHOW, 4) == 0)
         {
