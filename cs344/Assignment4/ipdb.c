@@ -23,7 +23,8 @@ References:
 
 #include "provided_materials/ipdb.h"
 
-#define SHM_NAME "ipdb_shm"
+static char SHM_NAME[32];
+
 #define BUF_SIZE 256
 #define MAX_LINE_SIZE 64
 
@@ -621,8 +622,7 @@ int main(int argc, char **argv)
     char *host = NULL;
     char *file = NULL;
     char *char_res = NULL;
-    char shm_location[64];
-
+    SHARED_MEM_NAME(SHM_NAME) 
     memset(read_buf, 0, BUF_SIZE);
     
     //try and open the shm, if it doesn't exist create it and initiallize its state
