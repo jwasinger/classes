@@ -1,3 +1,10 @@
+/*********************
+Name: Jared Wasinger
+ONID Email: wasingej@onid.oregonstate.edu
+Class: CS 344
+Assignment #4
+References:
+**********************/
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -18,6 +25,7 @@
 
 #define SHM_NAME "ipdb_shm"
 #define BUF_SIZE 256
+#define MAX_LINE_SIZE 64
 
 struct shm_db_hdr 
 {
@@ -37,23 +45,97 @@ int show_rows(void);
 int check(char *host);
 int save(char *destination);
 int load(char *source);
+int clear_table(void);
+
+int read_line(int fd, char *out_line);
 
 int lock_row(char *host);
-int unlock_row(char *host);
+int unlock_row(void);
 
 int lock_table(void);
 int unlock_table(void);
 
-static struct shm_db_hdr *hdr = NULL;
+
+static struct shm_db_hdr *db_hdr = NULL;
 static void *data_addr = NULL;
 int *shm_addr = NULL;
+
+static int row_locked = 0;
+static char *locked_row_host = NULL;
+
+int read_line(int fd, char *out_line)
+{
+    int write_pos = 0;
+    int res = 0;
+    int error = 0;
+    char buf[1];
+
+    if(!out_line)
+        return -1;
+
+    while((res = read(fd, buf, 1)) == 1)
+    {
+        if(buf[0] == '\n')
+        {
+            out_line[write_pos] = '\0';
+            return 0;
+        }
+        else
+        {
+            if(write_pos == MAX_LINE_SIZE)
+            {
+                printf("Max line length reached\n");
+                return -1;
+            }
+
+            out_line[write_pos] = buf[0];
+            write_pos++;
+        }
+    }
+    
+    if(res == 0)
+        return 1; //EOF
+    else if(res == -1)
+    {
+        error = errno;
+        printf("read() error: %s\n", strerror(error));
+        return -1;
+    }
+
+    return -1;
+}
+
+int clear_table(void)
+{
+    int i = 0;
+    int res = 0;
+    int error = 0;
+    ip_row_t *row = NULL;
+
+    for(; i < db_hdr->num_rows; i++)
+    {
+        row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
+        res = sem_destroy(&row->row_lock);
+        if(res == -1)
+        {
+            error = errno;
+            printf("sem_destroy error: %s\n", strerror(error));
+            return -1;
+        }
+    }
+
+    memset(data_addr, 0, sizeof(ip_row_t) * db_hdr->num_rows);
+    db_hdr->num_rows = 0;
+
+    return 0;
+}
 
 int lock_table(void)
 {
     int res = 0;
     int error = 0;
 
-    res = sem_trywait(&hdr->db_lock);
+    res = sem_trywait(&db_hdr->db_lock);
     if(res == -1)
     {
         if(errno == EAGAIN)
@@ -66,7 +148,7 @@ int lock_table(void)
         }
     }
 
-    hdr->db_locked = 1;
+    db_hdr->db_locked = 1;
     return 0;
 }
 
@@ -75,7 +157,7 @@ int unlock_table(void)
     int res = 0;
     int error = 0;
 
-    res = sem_post(&hdr->db_lock);
+    res = sem_post(&db_hdr->db_lock);
     if(res == -1)
     {
         error = errno;
@@ -83,7 +165,7 @@ int unlock_table(void)
         return -1;
     }   
 
-    hdr->db_locked = 0;
+    db_hdr->db_locked = 0;
     return 0;
 }
 
@@ -94,15 +176,23 @@ int lock_row(char *host)
     int i = 0;
     ip_row_t *row = NULL;
 
-    for(i = 0; i < hdr->num_rows; i++)
+    if(row_locked)
+    {
+        printf("can't lock another row while there is a row lock currently active.\n");
+        return 1;
+    }
+
+    for(i = 0; i < db_hdr->num_rows; i++)
     {
         row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
         if(strncmp(row->row_name, host, strlen(host)) == 0)
         {
+            row_locked = 1;
+            locked_row_host = row->row_name;
             break;
         }
 
-        if(i == hdr->num_rows -1)
+        if(i == db_hdr->num_rows -1)
         {
             printf("host not found\n");
             return -1;
@@ -125,14 +215,22 @@ int lock_row(char *host)
     return 0; 
 }
 
-int unlock_row(char *host)
+int unlock_row(void)
 {
     int res = 0;
     int error = 0;
     int i = 0;
     ip_row_t *row = NULL;
+    char *host = locked_row_host;
+    if(!row_locked)
+    {
+        printf("there is no currently locked row.\n");
+        return 0;
+    }
 
-    for(i = 0; i < hdr->num_rows; i++)
+    row_locked = 0;
+
+    for(i = 0; i < db_hdr->num_rows; i++)
     {
         row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
         if(strncmp(row->row_name, host, strlen(host)) == 0)
@@ -140,7 +238,7 @@ int unlock_row(char *host)
             break;
         }
 
-        if(i == hdr->num_rows -1)
+        if(i == db_hdr->num_rows -1)
         {
             printf("host not found\n");
             return -1;
@@ -164,7 +262,7 @@ int check(char *host)
     int i = 0;
     int res = 0;
 
-    for(i = 0; i < hdr->num_rows; i++)
+    for(i = 0; i < db_hdr->num_rows; i++)
     {
         //row = data_addr + i*sizeof(ip_row_t);
         row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
@@ -209,7 +307,7 @@ int show_rows(void)
     int num_rows = 0;
     ip_row_t *row;
 
-    /*res = sem_wait(&hdr->db_lock);
+    /*res = sem_wait(&db_hdr->db_lock);
     if(res == -1)
     {
         error = errno;
@@ -217,9 +315,9 @@ int show_rows(void)
         return -1;
     }*/
 
-    num_rows = hdr->num_rows;
+    num_rows = db_hdr->num_rows;
 
-    /*res = sem_post(&hdr->db_lock);
+    /*res = sem_post(&db_hdr->db_lock);
     if(res == -1)
     {
         error = errno;
@@ -258,7 +356,6 @@ int init_shm_db(int **addr)
     int fd = -1;
     int res = 0;
     int error;
-    struct shm_db_hdr *hdr;
     
     fd = shm_open(SHM_NAME, O_RDWR | O_CREAT, 0666);
     if(fd == -1)
@@ -285,17 +382,9 @@ int init_shm_db(int **addr)
         return -1;
     }
 
-    struct shm_db_hdr 
-    {
-        sem_t db_lock;
-        //int db_locked;
-        int db_size;
-        int num_rows;
-    };
-
-    hdr = (struct shm_db_hdr *)*addr;
+    db_hdr = (struct shm_db_hdr *)*addr;
     
-    res = sem_init(&hdr->db_lock, 1, 1);
+    res = sem_init(&db_hdr->db_lock, 1, 1);
     if(res == -1)
     {
         error = errno;
@@ -303,8 +392,8 @@ int init_shm_db(int **addr)
         return -1;
     }
 
-    hdr->db_size = 0;
-    hdr->num_rows = 0;
+    db_hdr->db_size = 0;
+    db_hdr->num_rows = 0;
 
     return 0;
 }
@@ -374,13 +463,13 @@ int add_entry(char *host)
     char ip_v4[NAME_SIZE];
     char ip_v6[NAME_SIZE];
 
-    if(hdr->db_locked)
+    if(db_hdr->db_locked)
     {
         printf("can't add entries while the table is locked\n");
         return 1;
     }
 
-    res = sem_wait(&hdr->db_lock);
+    res = sem_wait(&db_hdr->db_lock);
     if(res == -1)
     {
         error = errno;
@@ -388,9 +477,9 @@ int add_entry(char *host)
         return -1;
     }
 
-    /*if(hdr->db_locked)
+    /*if(db_hdr->db_locked)
     {
-        sem_post(&hdr->db_lock);
+        sem_post(&db_hdr->db_lock);
         return 1;
     }*/
 
@@ -402,9 +491,9 @@ int add_entry(char *host)
         return -1;
     }
 
-    num_rows = hdr->num_rows;
-    hdr->num_rows++;
-    sem_post(&hdr->db_lock);
+    num_rows = db_hdr->num_rows;
+    db_hdr->num_rows++;
+    sem_post(&db_hdr->db_lock);
     
     last_row = (ip_row_t *)(addr + (num_rows)*sizeof(ip_row_t));
     memset(last_row, 0, sizeof(ip_row_t));
@@ -436,7 +525,7 @@ int save(char *destination)
 {
     int fd = -1;
     int error = 0;
-    char line_str[NAME_SIZE+2];
+    char line_str[MAX_LINE_SIZE];
     int i = 0;
     int res = 0;
     ip_row_t *row = NULL;
@@ -453,7 +542,7 @@ int save(char *destination)
         return -1;
     }
 
-    for(; i < hdr->num_rows; i++)
+    for(; i < db_hdr->num_rows; i++)
     {
         row = (ip_row_t *)((int *)data_addr + i*sizeof(ip_row_t));
         
@@ -465,8 +554,9 @@ int save(char *destination)
             return -1;
         }
 
-        memset(line_str, 0, NAME_SIZE+2);
-        sprintf(line_str, "%s\n", row->row_name);
+        memset(line_str, 0, MAX_LINE_SIZE);
+        sprintf(line_str, "%s", row->row_name);
+        line_str[strlen(line_str)] = '\n';
 
         res = sem_post(&row->row_lock);
         if(res == -1)
@@ -476,7 +566,7 @@ int save(char *destination)
             return -1;
         }
 
-        res = write(fd, line_str, NAME_SIZE+1);
+        res = write(fd, line_str, strlen(line_str));
         if(res == -1)
         {
             error = errno;
@@ -490,8 +580,7 @@ int save(char *destination)
 
 int load(char *source)
 {
-    char line[NAME_SIZE+1];
-    int i = 0;
+    char line[MAX_LINE_SIZE];
     int fd = -1;
     char *host = NULL;
     int res = 0;
@@ -507,34 +596,11 @@ int load(char *source)
 
     while(1)
     {
-        res = read(fd, line, NAME_SIZE+1);
-        if(res < NAME_SIZE+1)
-        {
-            if(res <= -1)
-            {
-                error = errno;
-                printf("read error: %s\n", strerror(error));
-                return -1;
-            }
-            else if (res < NAME_SIZE+1 && res > 0)
-            {
-                printf("less bytes read than expected\n");
-                return -1;   
-            }
-            else
-            {
-                break; //EOF reached
-            }
-        }
-
-        for(i = 0; i < NAME_SIZE+1; i++)
-        {
-            if(line[i] == '\n')
-            {
-                line[i] = '\0';
-                break;
-            }
-        }
+        res = read_line(fd, line);
+        if(res == -1)
+            return -1;
+        else if(res == 1)
+            break;
 
         host = line;
         res = add_entry(host);
@@ -554,6 +620,8 @@ int main(int argc, char **argv)
     int i = 0;
     char *host = NULL;
     char *file = NULL;
+    char *char_res = NULL;
+    char shm_location[64];
 
     memset(read_buf, 0, BUF_SIZE);
     
@@ -565,7 +633,7 @@ int main(int argc, char **argv)
         if(res == -1)
             return -1;
 
-        hdr = (struct shm_db_hdr *)shm_addr;
+        db_hdr = (struct shm_db_hdr *)shm_addr;
         data_addr = (int *)shm_addr + sizeof(struct shm_db_hdr);
     }
     else
@@ -585,15 +653,16 @@ int main(int argc, char **argv)
             return -1;
         }
         
-        hdr = (struct shm_db_hdr *)shm_addr;
+        db_hdr = (struct shm_db_hdr *)shm_addr;
         data_addr = (int *)shm_addr + sizeof(struct shm_db_hdr);
     }   
     
     while(1)
     {
         //read from command line
-        res = fgets(read_buf, BUF_SIZE, stdin);
-        if(res == NULL)
+        printf(">>>");
+        char_res = fgets(read_buf, BUF_SIZE, stdin);
+        if(char_res == NULL)
         {
             printf("error");
             exit(-1);
@@ -655,7 +724,9 @@ int main(int argc, char **argv)
         }
         else if(strncmp(read_buf, CMD_CLEAR, 5) == 0)
         {
-            printf("exit1");
+            res = clear_table();
+            if(res == -1)
+                return -1;
         }
         else if(strncmp(read_buf, CMD_LOCK_TABLE, 10) == 0)
         {
@@ -678,8 +749,7 @@ int main(int argc, char **argv)
         }
         else if(strncmp(read_buf, CMD_UNLOCK_ROW, 10) == 0)
         {
-            host = read_buf + 11;
-            res = unlock_row(host);
+            res = unlock_row();
             if(res == -1)
                 return -1;
         }
@@ -688,12 +758,23 @@ int main(int argc, char **argv)
     }
 
     res = shm_unlink(SHM_NAME);
-    if(res == -1)
+    if(res == -1 && errno != ENOENT)
     {
         error = errno;
         printf("shm_unlink error on %s: %s\n", SHM_NAME, strerror(error));
         return -1;
     }
+
+    /*
+    res = remove("/dev/shm");
+    if(res == -1)
+    {
+        error = errno;
+        printf("remove error: %s\n", strerror(error));
+        return -1;
+    }
+    */
+    
     //do cleanup operations here
 
     return 0;
