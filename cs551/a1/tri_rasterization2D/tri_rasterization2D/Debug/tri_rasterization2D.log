@@ -1,13 +1,111 @@
-﻿Build started 1/17/2015 1:00:15 PM.
-     1>Project "c:\Users\Jared\classes\cs551\a1\tri_rasterization2D\tri_rasterization2D\tri_rasterization2D.vcxproj" on node 2 (Build target(s)).
+﻿Build started 1/18/2015 1:29:13 PM.
+     1>Project "C:\Users\Jared\classes\cs551\a1\tri_rasterization2D\tri_rasterization2D\tri_rasterization2D.vcxproj" on node 2 (Rebuild target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt log.cpp main.cpp osuGraphics.cpp OSUImage.cpp poly.cpp
+         poly.cpp
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(51): error C3861: 'osuBeginGraphics': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(57): error C3861: 'simple_triangle': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(60): error C3861: 'osuSetWriteMode': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(61): error C3861: 'abutting_triangles': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(64): error C3861: 'osuSetWriteMode': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(65): error C3861: 'color_polygons': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(69): error C3861: 'osuSetWriteMode': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(70): error C3861: 'wedges': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(74): error C3861: 'osuSetWriteMode': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(75): error C3861: 'overlapTest': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(82): error C3861: 'osuFlush': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(83): error C3861: 'osuWaitOnEscape': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(84): error C3861: 'osuEndGraphics': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\poly.cpp(284): error C3861: 'osuSetWriteMode': identifier not found
+         OSUImage.cpp
+         osuGraphics.cpp
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(25): error C2228: left of '.data' must have class/struct/union
+                 type is 'unknown-type'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(25): error C3861: 'GetShaderPath': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(27): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(27): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(31): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(31): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(37): error C2228: left of '.data' must have class/struct/union
+                 type is 'unknown-type'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(37): error C3861: 'GetShaderPath': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(39): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(39): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(43): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(43): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(49): error C2065: 'device' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(49): error C2227: left of '->CreatePixelShader' must point to class/struct/union/generic type
+                 type is 'unknown-type'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(49): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(49): error C2227: left of '->texturePShader' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(55): error C2065: 'device' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(55): error C2227: left of '->CreateVertexShader' must point to class/struct/union/generic type
+                 type is 'unknown-type'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(55): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(55): error C2227: left of '->textureVShader' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(70): error C2065: 'positionInputElement' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(70): error C2440: 'initializing' : cannot convert from 'D3D11_INPUT_ELEMENT_DESC' to 'UINT'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(72): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(72): error C2227: left of '->device' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(72): error C2227: left of '->CreateInputLayout' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(72): error C2227: left of '->textureInputLayout' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(78): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(78): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(79): error C2065: 'SafeRelease' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(79): error C2275: 'ID3DBlob' : illegal use of this type as an expression
+                 c:\program files (x86)\windows kits\8.1\include\um\d3dcommon.h(440) : see declaration of 'ID3DBlob'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(97): error C3861: 'log_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(97): error C3861: 'get_COM_err_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(102): error C2086: 'D3D_FEATURE_LEVEL featureLvl11' : redefinition
+                 c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(87) : see declaration of 'featureLvl11'
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(139): error C3861: 'log_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(139): error C3861: 'get_COM_err_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(167): error C3861: 'log_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(167): error C3861: 'get_COM_err_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(174): error C3861: 'log_str': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osugraphics.cpp(174): error C3861: 'get_COM_err_str': identifier not found
          main.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"c:\users\jared\classes\cs551\a1\tri_rasterization2D\Debug\tri_rasterization2D.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\users\jared\classes\cs551\a1\tri_rasterization2D\Debug\tri_rasterization2D.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"c:\users\jared\classes\cs551\a1\tri_rasterization2D\Debug\tri_rasterization2D.lib" /MACHINE:X86 Debug\main.obj
-         tri_rasterization2D.vcxproj -> c:\users\jared\classes\cs551\a1\tri_rasterization2D\Debug\tri_rasterization2D.exe
-     1>Done Building Project "c:\Users\Jared\classes\cs551\a1\tri_rasterization2D\tri_rasterization2D\tri_rasterization2D.vcxproj" (Build target(s)).
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(87): error C2065: 'base_path' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(87): error C2228: left of '.append' must have class/struct/union
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(87): error C2065: 'shader_path' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(132): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(132): error C2227: left of '->texturePShader' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(132): error C2660: 'ID3D11Device::CreatePixelShader' : function does not take 3 arguments
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(138): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(138): error C2227: left of '->textureVShader' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(138): error C2660: 'ID3D11Device::CreateVertexShader' : function does not take 3 arguments
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(153): error C2065: 'positionInputElement' : undeclared identifier
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(153): error C2440: 'initializing' : cannot convert from 'D3D11_INPUT_ELEMENT_DESC' to 'UINT'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(155): error C2355: 'this' : can only be referenced inside non-static member functions or non-static data member initializers
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(155): error C2227: left of '->device' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(155): error C2227: left of '->CreateInputLayout' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(155): error C2227: left of '->textureInputLayout' must point to class/struct/union/generic type
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(184): error C2086: 'D3D_FEATURE_LEVEL featureLvl11' : redefinition
+                 c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\main.cpp(170) : see declaration of 'featureLvl11'
+         log.cpp
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\log.cpp(11): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\log.cpp(66): error C2664: 'std::vector<std::wstring,std::allocator<_Ty>> split_no_remove(const std::wstring &,wchar_t)' : cannot convert argument 1 from 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' to 'const std::wstring &'
+                 with
+                 [
+                     _Ty=std::wstring
+                 ]
+                 Reason: cannot convert from 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' to 'const std::wstring'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\log.cpp(81): error C3861: 'OutputDebugString': identifier not found
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\log.cpp(82): error C3861: 'OutputDebugString': identifier not found
+         Generating Code...
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osuimage.cpp(16): error C4716: 'OSUImage::Init' : must return a value
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osuimage.cpp(21): error C4716: 'OSUImage::GetSize' : must return a value
+     1>c:\users\jared\classes\cs551\a1\tri_rasterization2d\tri_rasterization2d\osuimage.cpp(36): error C4716: 'OSUImage::ReadPixel' : must return a value
+     1>Done Building Project "C:\Users\Jared\classes\cs551\a1\tri_rasterization2D\tri_rasterization2D\tri_rasterization2D.vcxproj" (Rebuild target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:01.11
+Time Elapsed 00:00:03.97
