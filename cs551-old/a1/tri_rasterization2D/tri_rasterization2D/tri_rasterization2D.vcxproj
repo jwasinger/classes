@@ -20,7 +20,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -78,13 +78,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="log.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="osuGraphics.c" />
+    <ClCompile Include="misc.cpp" />
+    <ClCompile Include="osuGraphics.cpp" />
+    <ClCompile Include="OSUImage.cpp" />
     <ClCompile Include="poly.cpp" />
     <ClCompile Include="rect.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="log.h" />
+    <ClInclude Include="misc.h" />
     <ClInclude Include="osuGraphics.h" />
+    <ClInclude Include="OSUImage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
