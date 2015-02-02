@@ -33,7 +33,7 @@ namespace A2Math
       static Matrix CreateScale(Vector3 vec);
       static Matrix CreateOrthographicLH(double left, double right, double bottom, double top, double near, double far);
 
-      static Matrix CreatePerspectiveFovLH(double fov, double near, double far);
+      static Matrix CreatePerspectiveFOV(double fov, double near, double far);
 
       static Matrix CreateLookAt(Vector3 target, Vector3 eye, Vector3 up);
   };
