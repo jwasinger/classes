@@ -1,0 +1,21 @@
+data Cmd = Pen Mode
+         | MoveTo Int Int
+         | Seq Cmd Cmd
+	 deriving Show
+
+data Mode = Up | Down deriving Show
+
+type State = (Mode, Int, Int)
+type Line = (Int, Int, Int, Int)
+type Lines = [Line]
+
+semS :: Cmd -> State -> (State, Lines)
+semS (Pen Up) (m, x, y)   = ((Up, x, y), [])
+semS (Pen Down) (m, x, y) = ((Down, x, y), [])
+semS (MoveTo x y) (m, x2, y2) = ((m, x2, y2), [(x2, y2, x, y)])
+semS (Seq c c') (m, x, y) = 
+	(fst (semS c' (m, x, y)) , 
+	 [(x,y,x,y)]++(snd (semS c' (m, x, y)) ))
+
+sem' :: Cmd -> Lines
+sem' c = snd (semS c (Up, 0, 0))

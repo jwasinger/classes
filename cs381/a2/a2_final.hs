@@ -1,6 +1,38 @@
+--Team Members:  Jared Wasinger, Justin Thrailkill
+
 import System.IO
 
---import Semantics
+--Excercise #1
+
+type Prog = [Cmd]
+type Stack = [Int]
+
+data Cmd = LD Int
+         | ADD 
+         | MULT 
+         | DUP
+         deriving Show
+
+type D = Maybe Stack -> Maybe Stack
+
+semCmd :: Cmd -> D
+semCmd (LD i) (Just s)        = Just (i:s)
+semCmd (ADD)  (Just (x:y:xs)) = Just ((x+y):xs)
+-- semCmd (ADD)  (Just s)        = Nothing
+
+semCmd (MULT) (Just (x:y:xs)) = Just ((x*y):xs)
+--semCmd (MULT) (Just s)        = Nothing
+
+semCmd DUP    (Just (x:xs))   = Just ((x*2):xs)
+semCmd c s = Nothing 
+
+sem :: Prog -> D 
+sem [] c = c 
+sem (o:os) c = sem os (semCmd o c)
+
+--
+--Excercise #2
+--
 
 ppLines :: Lines -> IO ()
 ppLines ls = withFile "lines.svg" WriteMode $ flip hPutStrLn $ toSVG ls
@@ -19,9 +51,7 @@ lineSVG (x1,y1,x2,y2) =
   "' x2='" ++ show x2 ++
   "' y2='" ++ show y2 ++ "'/>\n"
 
---
--- START: our code
---
+--Our code below
 
 data Cmd = Pen Mode
          | MoveTo Int Int
@@ -67,8 +97,10 @@ semS (Seq c c') (m, x, y) =
 sem' :: Cmd -> Lines
 sem' c = snd (semS c (Up, 0, 0))
 
+-- Test code: 
 my_lines = 
     sem' (Seq (Pen Down) (Seq 
             (MoveTo 0 100) (Seq 
                 (MoveTo 100 100) (Seq 
                     (Pen Up) (MoveTo 0 0)))))
+
