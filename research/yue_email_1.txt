@@ -1,0 +1,26 @@
+Hi,
+
+I am reading the Wikipedia page on Digital Image Correlation.  There are a few things I am confused about.  
+
+First, the page says that the relationship between original coordinates (x, y) and deformed coordinates (x', y') can be approximated as:
+
+x' = x + u + (du/dx)*d_x + (du/dy)*d_y 
+y' = y + v + (dv/dx)*d_x + (dv/dy)*d_y
+
+where: 
+d*/d* refers to a partial derivative.
+d_* refers to the distance from the center of the non-deformed image (either x or y).
+
+u,v are translations of the center of the non-deformed image in X, Y directions respectively.  
+
+I'm confused as to why the partial derivatives of what seem to be constant values are useful in this case. There's obviously something I'm missing here but I'm not sure what it is. 
+
+Another thing that confused me was the page's use of sigma notation.  In the equation for the cross correlation coefficient, there is multiple use of sigmas which imply that the coefficient is calculated by summing over a 2D surface of values.  However, in an accompanying visual, it shows a graph where the corellation coefficient is placed on the z-axis which would seem to imply that each point (x,y) has a corresponding value for the corellation coefficient.  
+
+I came to the conclusion that the coefficient can be calculated for any given point and that the sigma notation in the equation is just a hint to the reader that the coefficient can/should be calculated for an appropriate domain of points on the (x,y) plane.  Is this correct?
+
+Hopefully that long rant of text made some sense.  If not, we can just discuss the topic on Wednesday.  
+
+I watched the video on snow simulation and found what appears to be the paper that corresponds to it (https://www.math.ucla.edu/~jteran/papers/SSCTS13.pdf).  I skimmed over to get a general understanding but haven't really gone over it in detail.  The method involved seems to be somewhat related to the topics that Sanaz went over in her presentation last week, albeit with added complexity.  I'm planning on giving it a more thorough read either tomorrow or Tuesday so I'll let you know what I think of it.
+
+Jared
