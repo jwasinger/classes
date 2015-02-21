@@ -11,6 +11,7 @@ Line drawing in 3D.
 #include "lines.h"
 #include <Windows.h>
 
+#include "Matrix.h"
 
 int xsize = 360;
 int ysize = 360;
@@ -476,6 +477,7 @@ void all()
 	static int count = 1;
 	osuInitialize();
 	osuClear(0,0,0);
+
 	switch(count){
 		case 1:
 			line_test();
@@ -521,19 +523,31 @@ Test out drawing routines.
 ******************************************************************************/
 void main(int argc , char **argv)
 {
-  int num;
-  num = atoi(argv[1]);
+  int num = 7;
+
+
+  /*num = atoi(argv[1]);
 
   if((num <0 ) || (num > 11))
 	{
 		fprintf(stderr, "Please call this program with a number from 1 to 12 \n");
 		exit(-1);
 	}
+	*/
+
+  A2Math::Matrix::matrix_tests();
 
   osuBeginGraphics (xsize, ysize);
 
   /* inialize the matrix stack*/
   osuInitialize();
+
+  //ortho_test();
+  //ortho_cube();
+
+  //osuVertex3f(0.0, 0.0, 30.0);
+  //osuVertex3f(340.0, 340.0, 30.0);
+
   /* select routine to execute */
   switch (num) {
     case 1:
@@ -573,7 +587,7 @@ void main(int argc , char **argv)
     default:
 		 fprintf (stderr, "Please use a number from 1 to 11.\n");
          exit (-1);
-  } 
+  }
 
   osuFlush();
 
