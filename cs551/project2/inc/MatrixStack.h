@@ -15,12 +15,11 @@ using namespace A2Math;
 class MatrixStack
 {
 private:
-	std::vector<Matrix> mat_vec;
 	Matrix projection;
+	std::vector<Matrix> mat_vec;
 
 public:
 	PROJ_TYPE proj_type;
-
 
 	MatrixStack();
 	~MatrixStack();
@@ -29,7 +28,7 @@ public:
 	Matrix get_proj(void) const { return this->projection; }
 	void push_mat(Matrix m);
 	void pop_mat(void);
-	Matrix calc_top(void);
-	
+	Matrix calc_val(void);
+	Matrix &get_top(void);
 };
 #endif

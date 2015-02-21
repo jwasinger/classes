@@ -165,6 +165,9 @@ namespace A2Math
 
 	Matrix Matrix::CreatePerspectiveFOV(double fov, double aspect, double near, double far)
 	{
+		near = -near;
+		far = -far;
+
 		Matrix m;
 		m.m00 = (1.0 / aspect)*cot(fov / 2.0);
 		m.m10 = 0.0;
@@ -222,29 +225,32 @@ namespace A2Math
 		m.m32 = 0.0;*/
 	}
 
-	Matrix Matrix::CreateRotationAxisAngle(const Vector4 &axis, double angle)
+	Matrix Matrix::CreateRotationAxisAngle(const Vector4 &a, double angle)
 	{
-		/*axis.Normalize();
+		//angle = 2 * 3.14159 - 2 * angle;
+		Vector4 axis = a;
+		axis.Normalize();
 		double c = cos(angle);
 		double s = sin(angle);
 		double C = 1 - c;
 
 		Matrix m;
-		m.m00 = axis.X() * axis.X() * C + c;
-		m.m10 = axis.X() * axis.Y() * C - axis.Z() * s;
-		m.m20 = axis.X() * axis.Z() * C + axis.Y() * s;
+		m.m00 = axis.X * axis.X * C + c;
+		m.m10 = axis.X * axis.Y * C - axis.Z * s;
+		m.m20 = axis.X * axis.Z * C + axis.Y * s;
 		m.m30 = 0.0;
 
-		m.m01 = axis.Y() * axis.X() * C + axis.Z() * s;
-		m.m11 = axis.Y() * axis.Y() * C + c;
-		m.m21 = axis.Y() * axis.Z() * C - axis.X() * s;
+		m.m01 = axis.Y * axis.X * C + axis.Z * s;
+		m.m11 = axis.Y * axis.Y * C + c;
+		m.m21 = axis.Y * axis.Z * C - axis.X * s;
 		m.m31 = 0.0;
 
-		m.m02 = axis.Z() * axis.X() * C - axis.Y() * s;
-		m.m12 = axis.Z() * axis.Y() * C + axis.X() * s;
-		m.m22 = axis.Z() * axis.Z() * C + c;
+		m.m02 = axis.Z * axis.X * C - axis.Y * s;
+		m.m12 = axis.Z * axis.Y * C + axis.X * s;
+		m.m22 = axis.Z * axis.Z * C + c;
 		m.m23 = 0.0;
-		*/
+		
+		return m;
 		//original ^^
 
 		/*
@@ -265,7 +271,7 @@ namespace A2Math
 		*/
 		//modified ^^
 
-		Matrix m;
+		/*Matrix m;
 		double c = cos(angle);
 		double s = sin(angle);
 		double d = 1 - c;
@@ -292,7 +298,7 @@ namespace A2Math
 		m.m23 = 0.0;
 		m.m33 = 1.0;
 
-		return m;
+		return m;*/
 	}
 
 	void Matrix::MulWithW(const Vector4 &v, Vector4 &out_v, double &out_w)

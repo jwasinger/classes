@@ -365,13 +365,13 @@ Draw a face.
 void face()
 {
   /* head */
-
+ 
   osuPushMatrix();
   osuTranslate (0.5, 0.5, -1.0);
   osuScale (0.4f, 0.4f, 1.0f);
   circle();
   osuPopMatrix();
-
+  
   /* right eye */
 
   osuPushMatrix();
@@ -387,15 +387,15 @@ void face()
   osuScale (0.1f, 0.1f, 1.0f);
   circle();
   osuPopMatrix();
-
+  
   /* nose */
-
+	
   osuPushMatrix();
   osuTranslate (0.5f, 0.5f, -1.0f);
   osuScale (0.07f, 0.07f, 1.0f);
   circle();
   osuPopMatrix();
-
+  
   /* mouth */
 
   osuPushMatrix();
@@ -523,30 +523,20 @@ Test out drawing routines.
 ******************************************************************************/
 void main(int argc , char **argv)
 {
-  int num = 7;
-
-
-  /*num = atoi(argv[1]);
+  int num = atoi(argv[1]);
 
   if((num <0 ) || (num > 11))
-	{
-		fprintf(stderr, "Please call this program with a number from 1 to 12 \n");
-		exit(-1);
-	}
-	*/
+  {
+	fprintf(stderr, "Please call this program with a number from 1 to 12 \n");
+	exit(-1);
+  }
 
   A2Math::Matrix::matrix_tests();
 
   osuBeginGraphics (xsize, ysize);
 
   /* inialize the matrix stack*/
-  osuInitialize();
-
-  //ortho_test();
-  //ortho_cube();
-
-  //osuVertex3f(0.0, 0.0, 30.0);
-  //osuVertex3f(340.0, 340.0, 30.0);
+  osuInitialize(); 
 
   /* select routine to execute */
   switch (num) {
