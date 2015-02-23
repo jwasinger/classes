@@ -1,15 +1,22 @@
+#include "matlib.h"
+#include "osuGraphics.h"
+
 void simpleTest()
 {
 	osuPerspective(90.0, 1.0, -1000.);
 
-	float from[3]={3.0,0.0,3.0};
-	float at[3] = {0.0,0.0,-8.0};
-	float up[3] = {0.0, 1.0, 0.0};
+	/*
+	double from[3]={3.0,0.0,3.0};
+	double at[3] = { 0.0, 0.0, -8.0 };
+	double up[3] = { 0.0, 1.0, 0.0 };
+	*/
+	Vector4 from = Vector4(3.0, 0.0, 3.0);
+	Vector4 at = Vector4(0.0, 0.0, -8.0);
+	Vector4 up = Vector4(0.0, 1.0, 0.0);
 
 	osuLookat (from, at, up);
 
 	osuClear(0.0,0.0,0.0);
-
 
 	osuDiffuse(0.0, 0.0 , 1.0 );
 	osuSpecular(1.0, 1.0, 1.0, 1.0);
@@ -45,9 +52,9 @@ void blueCube()
 {
 	osuPerspective(40, 7.5, 100);
 
-	float from[3]={5.0,5.0,5.0};
-	float at[3] = {0.0,0.0,0.0};
-	float up[3] = {0.0, 1.0, 0.0};
+	double from[3]={5.0,5.0,5.0};
+	double at[3] = {0.0,0.0,0.0};
+	double up[3] = {0.0, 1.0, 0.0};
 
 	osuLookat (from, at, up);
 
