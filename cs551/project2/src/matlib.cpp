@@ -189,5 +189,10 @@ void osuRotate(double angle, double ax, double ay, double az)
 
 void osuLookat(double from[3], double at[3], double up[3])
 {
+	Matrix &m = mat_stack.get_top();
+	m = m * Matrix::CreateLookAt(Vector4(at[0], at[1], at[2], 1.0),
+		Vector4(from[0], from[1], from[2], 1.0),
+		Vector4(up[0], up[1], up[2], 1.0)
+		);
 }
 
