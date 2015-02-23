@@ -39,7 +39,7 @@ enum OSUEnable { OSU_DEPTH_TEST };
 void osuBeginGraphics ( int w, int h );
 void osuEndGraphics ();
 void osuClear ( int r, int g, int b );
-void osuFlush();
+void osuFlush(void);
 void osuWritePixel ( int x, int y, int r, int g, int b );
 void osuSetWriteMode ( int /* OSUWriteMode */ mode );
 void osuWaitOnEscape ();
@@ -51,12 +51,12 @@ void osuGetFramebufferSize ( int *w, int *h );
 enum OSUDrawable { OSU_NONE, OSU_TRIANGLE ,OSU_LINES, OSU_POLYGON };
 
 void osuBegin ( int /* OSUDrawable */ );
-void osuEnd ();
+void osuEnd (void);
 
 //void osuClear(float r, float g, float b);
 void osuNormal3f(double x, double y, double z);
 void osuEnable(int depthTestBit);
-void osuClearZ();
+void osuClearZ(void);
 void osuShadeModel(int model);
 void osuPointLight(double pos[3], double i);
 void osuDirectionalLight(Vector4 &v, float i);

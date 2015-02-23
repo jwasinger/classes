@@ -8,7 +8,7 @@ Line and matrix header.
 */
 
 void draw_line(double x0, double y0, double x1, double y1);
-int near_far_clip(double,double,double*,double*,double*,double*,double*,double*);
+//int near_far_clip(double,double,double*,double*,double*,double*,double*,double*);
 void osuInitialize();
 void osuPushMatrix();
 void osuPopMatrix();
@@ -23,7 +23,7 @@ void osuLookat(const Vector4 &from, const Vector4 &at, const Vector4 &up);
 void osuBegin(OSUDrawable);
 void osuEnd();
 */
-void osuVertex3f(double, double, double);
+void osuVertex3f(double x, double y, double z);
 
 #endif
 
