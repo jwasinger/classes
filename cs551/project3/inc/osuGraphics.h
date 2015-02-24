@@ -58,12 +58,14 @@ void osuNormal3f(double x, double y, double z);
 void osuEnable(int depthTestBit);
 void osuClearZ(void);
 void osuShadeModel(int model);
-void osuPointLight(double pos[3], double i);
-void osuDirectionalLight(Vector4 &v, float i);
+void osuPointLight(PLight p);
+void osuDirectionalLight(DLight d);
 void osuAmbientLight(float i);
 void osuVertex2f(double x, double y);
-void osuDiffuse(unsigned short r, unsigned short g, unsigned short  b);
-void osuSpecular(unsigned short r, unsigned short g, unsigned short b, float intensity);
+void osuVertex3f(double x, double y, double z);
+void osuDiffuse(Vector4 diffuse_color);
+void osuSpecular(Vector4 specular_color);
 
+void init_z_buffer(int w, int h);
 #endif  //end GFXSUPPORT
 

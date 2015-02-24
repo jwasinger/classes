@@ -265,32 +265,106 @@ void osuWaitOnEscape ()
 
 /*-----------------------------------*/
 
+static struct DrawState
+{
+  std::vector<DLight> d_lights;
+  std::vector<PLight> p_lights;
+  int shade_model;
+  int ambient_intensity;
+  Material mat;
+  bool z_test_enabled;
+  Vector4 diffuse_color;
+  Vector4 specular_color;
+  
+  int num_verts, num_normals;
+  Vector4 normals[3];
+  Vector4 verices[3];
+};
+
+static DrawState draw_state;
+static float *z_data;
+
 void osuNormal3f(double x, double y, double z)
-{}
+{
+  if(num_normals >= 3)
+  {
+    OutputDebugString("Attempting to add more than 3 normals before rendering a triangle...\n");
+    return;
+  }
+
+  Vector4 normal = Vector4(x,y,z);
+  draw_state.normals[num_normals-1] = normal;
+  num_normals++;
+}
+
+void osuRasterizeTriangle(void)
+{
+  
+}
+
+void osuVertex3f(double x, double y, double z)
+{
+  if(num_verts == 3)
+  {
+    //transform the vertex to Window space
+    //rasterize the triangle using the z-buffer test and lighting
+    osuRasterizeTriangle();
+    num_verts = 0;
+    num_normals = 0;
+    return;
+  }
+  
+  Vector4 vertex = Vector4(x,y,z);
+  draw_state.vertices[num_verts-1] = vertex;
+  draw_state.num_verts++;
+}
 
 void osuEnable(int depthTestBit)
-{}
+{
+  draw_state.z_test_enabled = true;  
+}
+
+
+void init_z_buffer(int w, int h)
+{
+  z_data = malloc(sizeof(float) * w * h);
+  ZeroMemory(z_data, sizeof(float) * w * h);
+}
 
 void osuClearZ()
-{}
+{
+  ZeroMemory(z_data, sizeof(float) * w * h);
+}
 
 void osuShadeModel(int model)
-{}
+{
+  draw_state.shade_model = model;
+}
 
-void osuPointLight(double pos[3], double i)
-{}
+void osuPointLight(PLight p)
+{
+  draw_state.p_lights.push_back(p);
+}
 
-void osuDirectionalLight(Vector4 &v, float i)
-{}
+void osuDirectionalLight(DLight l)
+{
+  draw_state.d_lights.push_back(l);
+}
 
 void osuAmbientLight(float i)
-{}
+{
+  draw_state.ambient_intensity = i;
+}
 
 void osuVertex2f(double x, double y)
 {}
 
-void osuDiffuse(unsigned short r, unsigned short g, unsigned short  b)
-{}
+void osuDiffuse(Vector4 diffuse_color)
+{
+  draw_state.diffuse_color = diffuse_color;
+}
 
-void osuSpecular(unsigned short r, unsigned short g, unsigned short b, float intensity)
-{}
+void osuSpecular(Vector4 specular_color)
+{
+  draw_state.specular_color = specular_color;
+}
