@@ -265,21 +265,6 @@ void osuWaitOnEscape ()
 
 /*-----------------------------------*/
 
-static struct DrawState
-{
-  std::vector<DLight> d_lights;
-  std::vector<PLight> p_lights;
-  int shade_model;
-  int ambient_intensity;
-  Material mat;
-  bool z_test_enabled;
-  Vector4 diffuse_color;
-  Vector4 specular_color;
-  
-  int num_verts, num_normals;
-  Vector4 normals[3];
-  Vector4 verices[3];
-};
 
 static DrawState draw_state;
 static float *z_data;
@@ -297,10 +282,86 @@ void osuNormal3f(double x, double y, double z)
   num_normals++;
 }
 
-void osuRasterizeTriangle(void)
+double tri_area3D(Vector2 v0, Vector2 v1, Vector2 v2)
 {
-  
+	return abs((v0.x*(v1.y - v2.y) + v1.x*(v2.y - v0.y) + v2.x*(v0.y - v1.y)) / 2.0);
 }
+
+void barycentric3D(Vector2 pos, Vector2 a, Vector2 b, Vector2 c, double &u, double &v, double &w)
+{
+	Vector2 v0 = { pos.x - a.x, pos.y - a.y };
+	Vector2 v1 = { b.x - a.x, b.y - a.y };
+	Vector2 v2 = { c.x - a.x, c.y - a.y };
+
+	double d20 = dot(v2, v0);
+	double d12 = dot(v1, v2);
+	double d22 = dot(v2, v2);
+	double d10 = dot(v1, v0);
+	double d11 = dot(v1, v1);
+	double d21 = dot(v2, v1);
+
+	double denom = d22*d11 - d21*d12;
+
+	v = (d10*d22 - d20*d21) / denom;
+	w = (d20*d11 - d10*d12) / denom;
+	u = 1.0 - (v + w);
+
+	if (u == 0) //distance from top: 12
+	{
+		int a = 0;
+	}
+	if (w == 0) //distance from right 01
+	{
+		int b = 0;
+	}
+	if (v == 0) //distance from diagonal 20
+	{
+		int c = 0;
+	}
+}
+
+void clip_and_rasterize(ObjTriangle &tri, ObjModel &model)
+{
+  //perform clipping
+  //rasterize 
+}
+
+void __rasterize_tri(ObjTriangle &tri, ObjModel &model)
+{
+	double u, v, w;
+	barycentric(pos, v0.Position, v1.Position, v2.Position, u, v, w);
+
+	bool u_cond, v_cond, w_cond;
+	u_cond = in_range_with_error(u, 0.0, 1.0, 0);
+	v_cond = in_range_with_error(v, 0.0, 1.0, 0);
+	w_cond = in_range_with_error(w, 0.0, 1.0, 0);
+	
+	if (u_cond && v_cond && w_cond)
+	{
+
+		double a0, a1, a2;
+		a0 = tri_area(v2.Position, pos, v1.Position);
+		a1 = tri_area(pos, v2.Position, v0.Position);
+		a2 = tri_area(pos, v0.Position, v1.Position);
+
+		double total_area = tri_area(v0.Position, v1.Position, v2.Position);
+    
+    //interpolate normals based on a*/total_area
+    if(draw_state.shade_model == OSU_FLAT)
+    {
+      
+    }
+    else
+    {
+    
+    }
+
+    //construct a bounding box around the triangle and rasterize the pixels contained by the box
+		return true;
+	}
+	return false;
+}
+
 
 void osuVertex3f(double x, double y, double z)
 {
