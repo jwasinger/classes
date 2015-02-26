@@ -10,8 +10,6 @@ enum PROJ_TYPE
 	PROJ_ORTHO
 };
 
-using namespace A2Math;
-
 class MatrixStack
 {
 private:

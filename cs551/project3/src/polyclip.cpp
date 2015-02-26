@@ -9,12 +9,6 @@ Routine to perform polygon clipping.
 #include <math.h>
 #include "osuGraphics.h"
 
-typedef struct osuVertex {
-  float x,y,z;
-  float r,g,b;
-} osuVertex;
-
-
 
 /******************************************************************************
 Copy the contents of a source vertex to a destination vertex.

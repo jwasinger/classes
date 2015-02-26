@@ -23,11 +23,8 @@ These are for you to write!
 
 //-------------------------------------------------
 
-using namespace A2Math;
-
-
 static int num_verts = 0;
-static A2Math::Vector4 verts[2];
+static Vector4 verts[2];
 
 static MatrixStack mat_stack;
 static const double pi = 3.14159;
@@ -75,20 +72,20 @@ void osuVertex3f(double x, double y, double z)
 	if (num_verts == 0)
 	{
 		num_verts++;
-		verts[0] = A2Math::Vector4(x, y, z, 1.0);
+		verts[0] = Vector4(x, y, z, 1.0);
 	}
 	else
 	{
-		A2Math::Matrix t = mat_stack.calc_val();
-		A2Math::Matrix p = mat_stack.get_proj();
+		Matrix t = mat_stack.calc_val();
+		Matrix p = mat_stack.get_proj();
 
-		verts[1] = A2Math::Vector4(x, y, z, 1.0);
+		verts[1] = Vector4(x, y, z, 1.0);
 		num_verts = 0;
 
 		//transform the vertices 
 		//draw line using transformed vertices
 
-		A2Math::Vector4 t_v1, t_v2;
+		Vector4 t_v1, t_v2;
 		
 		if (mat_stack.proj_type == PROJ_PERSPECTIVE)
 		{
@@ -166,7 +163,7 @@ void osuTranslate(double tx, double ty, double tz)
 	/*Matrix m = Matrix::CreateTranslation(A2Math::Vector4(tx, ty, tz, 1.0));
 	cur_mat = cur_mat * m;*/
 	Matrix &m = mat_stack.get_top();
-	m = m * Matrix::CreateTranslation(A2Math::Vector4(tx, ty, tz, 1.0));
+	m = m * Matrix::CreateTranslation(Vector4(tx, ty, tz, 1.0));
 }
 
 void osuScale(double sx, double sy, double sz) 
@@ -175,7 +172,7 @@ void osuScale(double sx, double sy, double sz)
 	cur_mat = cur_mat * m;*/
 
 	Matrix &m = mat_stack.get_top();
-	m = m * Matrix::CreateScale(A2Math::Vector4(sx, sy, sz, 1.0));
+	m = m * Matrix::CreateScale(Vector4(sx, sy, sz, 1.0));
 }
 
 
@@ -185,7 +182,7 @@ void osuRotate(double angle, double ax, double ay, double az)
 	cur_mat = cur_mat * m;*/
 	Matrix &m = mat_stack.get_top();
 	angle = angle * (pi / 180);
-	m = m * Matrix::CreateRotationAxisAngle(A2Math::Vector4(ax, ay, az, 1.0), angle);
+	m = m * Matrix::CreateRotationAxisAngle(Vector4(ax, ay, az, 1.0), angle);
 }
 
 void osuLookat(double from[3], double at[3], double up[3])

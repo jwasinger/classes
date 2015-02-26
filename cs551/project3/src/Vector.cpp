@@ -38,12 +38,28 @@ void Vector4::Normalize(void)
 	Y = Y / len;
 	Z = Z / len;
 }
+
+double Vector4::Length()
+{
+	return sqrt(X*X + Y*Y + Z*Z);
+}
+
 Vector4 Vector4::operator/(double d)
 {
-	return Vector4(this->X / d, this->Y / d, this->Z / d, this->W / d);
+	return Vector4(this->X / d, this->Y / d, this->Z / d);
+}
+
+Vector4 Vector4::operator/(double d)
+{
+	return Vector4(this->X * d, this->Y * d, this->Z * d);
 }
 
 Vector4 Vector4::operator+(const Vector4 &v) const
 {
-	return Vector4(this->X + v.X, this->Y + v.Y, this->Z + v.Z, this->W + v.W);
+	return Vector4(this->X + v.X, this->Y + v.Y, this->Z + v.Z);
+}
+
+Vector4 Vector4::operator-(const Vector4 &v) const
+{
+	return Vector4(this->X - v.X, this->Y - v.Y, this->Z - v.Z);
 }

@@ -89,6 +89,7 @@
     <ClInclude Include="inc\ObjLoader.h" />
     <ClInclude Include="inc\osuGraphics.h" />
     <ClInclude Include="inc\osuVector.h" />
+    <ClInclude Include="inc\Scene.h" />
     <ClInclude Include="inc\Vector.h" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +102,7 @@
     <ClCompile Include="src\osuGraphics.cpp" />
     <ClCompile Include="src\osuVector.cpp" />
     <ClCompile Include="src\polyclip.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\simpleTests.cpp" />
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>

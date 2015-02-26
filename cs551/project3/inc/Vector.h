@@ -14,8 +14,11 @@ public:
 	double Dot(Vector4 &v);
     Vector4 Cross(const Vector4 &v);
 	void Normalize(void);
-		
-	Vector4 operator+(const Vector4 &v) const;
+	double Length(void);
+
+	Vector4 operator*(double d) const;
+	Vector4 operator+(const Vector4 &v) const;	
+	Vector4 operator-(const Vector4 &v) const;
 	Vector4 operator/(double d);
 };
 
