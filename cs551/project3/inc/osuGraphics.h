@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "Vector.h"
 #include <vector>
-#include "MatrixStack.h"
+#include "matlib.h"
 
 // osuImage Data Type Definition            
 
@@ -28,12 +28,7 @@ struct Material
 	Vector4 specular; // w-component used for Phong coefficient
 };
 
-Material NULLMaterial =
-{
-	0.0,
-	Vector4(0.0, 0.0, 0.0, 0.0),
-	Vector4(0.0, 0.0, 0.0, 0.0)
-};
+extern Material NULLMaterial;
 
 struct PLight
 {
@@ -76,12 +71,16 @@ void osuSetWriteMode ( int /* OSUWriteMode */ mode );
 void osuWaitOnEscape ();
 void osuGetFramebufferSize ( int *w, int *h );
 
+void osuEnd(void);
+
 // Declarations of polygon drawing routines
 
 enum OSUDrawable { OSU_NONE, OSU_TRIANGLE ,OSU_LINES, OSU_POLYGON };
 enum OSUShadeModel { OSU_FLAT, OSU_SMOOTH };
 void osuBegin ( int /* OSUDrawable */ );
 void osuEnd (void);
+
+void osuInitialize(void);
 
 //void osuClear(float r, float g, float b);
 void osuNormal3f(double x, double y, double z);
@@ -96,6 +95,15 @@ void osuDiffuse(Vector4 diffuse_color);
 void osuSpecular(Vector4 specular_color);
 void osuFaceNormal3f(double x, double y, double z);
 
+/*static Matrix CreateRotationAxisAngle(const Vector4 &axis, double angle);
+static Matrix CreateTranslation(const Vector4 &vec);
+static Matrix CreateScale(const Vector4 &vec);
+static Matrix CreateOrthographicLH(double left, double right, double bottom, double top, double near, double far);
+
+static Matrix CreatePerspectiveFOV(double fov, double aspect, double near, double far);
+
+static Matrix CreateLookAt(Vector4 target, Vector4 eye, Vector4 up);*/
+
 Vector4 toNDC(Vector4 world);
 
 float osuGetZ(int x, int y);
@@ -105,8 +113,7 @@ void osuClearZ(void);
 void init_z_buffer(int w, int h);
 bool z_test(int x, int y);
 
-float z_buffer_w, z_buffer_h;
-MatrixStack mat_stack;
+extern int z_buffer_w, z_buffer_h;
 
 void poly_clip(
 	osuVertex *verts,

@@ -4,6 +4,7 @@
 #include "osuGraphics.h"
 #include "ObjLoader.h"
 #include "Vector.h"
+#include <vector>
 
 void init_scene(void);
 void destroy_scene(void);

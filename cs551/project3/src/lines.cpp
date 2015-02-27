@@ -9,11 +9,12 @@ Line clip and drawing.
 #include <math.h>
 #include "osuGraphics.h"
 
+/*
 typedef struct osuVertex {
   double x,y,z,w;
   double r,g,b;
 } osuVertex;
-
+*/
 
 /* the clipping window */
 static double xmin = 0.0;

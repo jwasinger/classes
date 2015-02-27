@@ -1,33 +1,7 @@
-/*
+#include "matlib.h"
 
-Dummy routines for matrix transformations.
-
-These are for you to write!
-
-*/
-
-
-#include <stdio.h>
-#include <math.h>
-#include <fstream>
-#include <Windows.h>
-#include <ostream>
-#include <sstream>
-#include <string>
-
-#include "osuGraphics.h"
-#include "lines.h"
-
-#include "Matrix.h"
-#include "MatrixStack.h"
-
-//-------------------------------------------------
-
-static int num_verts = 0;
-static Vector4 verts[2];
-
-static MatrixStack mat_stack;
 static const double pi = 3.14159;
+MatrixStack mat_stack = MatrixStack();
 
 void osuOrtho(double left, double right, double bottom, double top, double nearp,double farp)
 { 
@@ -54,17 +28,10 @@ void osuEnd()
 }
 */
 
-void osuColor3f(int r, int g, int b)
-{
-}
-
-void osuVertex2f(double x, double y)
-{
-}
 
 
 
-void osuVertex3f(double x, double y, double z)
+/*void osuVertex3f(double x, double y, double z)
 {
     int width, height;
 	osuGetFramebufferSize(&width, &height);
@@ -110,14 +77,6 @@ void osuVertex3f(double x, double y, double z)
 			t_v2 = p * t_v2;
 		}
 
-		//scale each vector component by frame buffer size
-		/*transform the vector from the standard canonical viewing space:
-			[(-1, 1), (-1, 1), (-1, 1)]
-		to the space of the frame buffer:
-			[(0,width), (0, height)]
-		
-		*/
-
 		t_v1.X = t_v1.X + 1.0;
 		t_v1.Y = t_v1.Y + 1.0;
 		t_v2.X = t_v2.X + 1.0;
@@ -132,11 +91,7 @@ void osuVertex3f(double x, double y, double z)
 		if (near_far_clip(-1.0, 1.0, &t_v1.X, &t_v1.Y, &t_v1.Z, &t_v2.X, &t_v2.Y, &t_v2.Z) == 1)
 			draw_line(t_v1.X, t_v1.Y, t_v2.X, t_v2.Y);
 	}
-}
-
-void osuInitialize() 
-{ 
-}
+}*/
 
 
 void osuPushMatrix() 

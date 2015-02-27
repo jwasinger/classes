@@ -49,7 +49,7 @@ Vector4 Vector4::operator/(double d)
 	return Vector4(this->X / d, this->Y / d, this->Z / d);
 }
 
-Vector4 Vector4::operator/(double d)
+Vector4 Vector4::operator*(double d) const
 {
 	return Vector4(this->X * d, this->Y * d, this->Z * d);
 }

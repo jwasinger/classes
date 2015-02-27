@@ -30,9 +30,6 @@
     <ClInclude Include="inc\MatrixStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\lines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -53,9 +50,6 @@
     <ClCompile Include="src\polyclip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\simpleTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\matlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,9 +66,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Vector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene.cpp">

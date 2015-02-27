@@ -56,6 +56,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -82,7 +83,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="inc\lines.h" />
     <ClInclude Include="inc\matlib.h" />
     <ClInclude Include="inc\Matrix.h" />
     <ClInclude Include="inc\MatrixStack.h" />
@@ -93,7 +93,6 @@
     <ClInclude Include="inc\Vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\lines.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\matlib.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
@@ -102,8 +101,9 @@
     <ClCompile Include="src\osuGraphics.cpp" />
     <ClCompile Include="src\osuVector.cpp" />
     <ClCompile Include="src\polyclip.cpp" />
-    <ClCompile Include="src\Scene.cpp" />
-    <ClCompile Include="src\simpleTests.cpp" />
+    <ClCompile Include="src\Scene.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\Vector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

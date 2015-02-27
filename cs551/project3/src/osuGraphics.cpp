@@ -13,8 +13,14 @@
 #include <malloc.h>
 #include "osuGraphics.h"
 #include "objLoader.h"
+#include "matlib.h"
 
 typedef unsigned char Byte;
+
+void osuInitialize(void)
+{
+	//create the matrix stack and populate it with default values
+}
 
 // osuImage Data Type Implementation                                
 long osuArray3DTo1D ( int chan, int w, int sizeW, int h, int sizeH )
@@ -74,6 +80,22 @@ void osuImageSetSize ( osuImage *I, int w, int h )
 /*-----------------------------------*/
 
 
+static OSUDrawState draw_state;
+static float *z_data;
+int z_buffer_w = 360;
+int z_buffer_h = 360;
+
+Material NULLMaterial =
+{
+	0.0,
+	Vector4(0.0, 0.0, 0.0, 0.0),
+	Vector4(0.0, 0.0, 0.0, 0.0)
+};
+
+void osuBegin(int flag)
+{
+
+}
 
 void osuImageReadPixel ( osuImage *I, int w, int h, int *r, int *g, int *b )
 {
@@ -122,8 +144,6 @@ void osuBeginGraphics ( int w, int h )
 	glutCreateWindow("CS551 OSUGL");
     gluOrtho2D( -0.5, w - 0.5, -0.5, h - 0.5 );
 
-
-
    //	set the single window state 
    OSUCurrentMode = OSU_OVERWRITE;
 
@@ -131,6 +151,16 @@ void osuBeginGraphics ( int w, int h )
    osuImageInit( &OSUCurrentImage );
    osuImageSetSize( &OSUCurrentImage, w, h );
    osuClear( 0, 0, 0 );
+
+   //set the draw state to a default value
+   draw_state.ambient_intensity = 0.3;
+   draw_state.diffuse_color = Vector4(1.0, 0.0, 0.0);
+   draw_state.mat = Material();
+   draw_state.mat.ambient_i = 0.5;
+   draw_state.mat.diffuse = Vector4(1.0, 0.0, 0.0);
+   draw_state.mat.specular = Vector4(0.0, 1.0, 0.0);
+   draw_state.num_normals = 0;
+   draw_state.num_verts = 0;
 }
 
 /*-----------------------------------*/
@@ -143,7 +173,7 @@ void osuGetFramebufferSize ( int *w, int *h )
 
 /*-----------------------------------*/
 
-void osuEndGraphics ( int w, int h )
+void osuEndGraphics ( void )
 {
    osuImageDestroy( &OSUCurrentImage );
 }
@@ -266,11 +296,7 @@ void osuWaitOnEscape ()
 
 /*-----------------------------------*/
 
-
-static OSUDrawState draw_state;
-static float *z_data;
-
-void osuFaceNormal(double x, double y, double z)
+void osuFaceNormal3f(double x, double y, double z)
 {
 	draw_state.face_normal = Vector4(x, y, z);
 }
@@ -284,7 +310,7 @@ void osuNormal3f(double x, double y, double z)
   }
 
   Vector4 normal = Vector4(x,y,z);
-  draw_state.normals[draw_state.num_normals-1] = normal;
+  draw_state.normals[draw_state.num_normals] = normal;
   draw_state.num_normals++;
 }
 
@@ -333,6 +359,8 @@ osuVertex Vector4_to_osuVertex(Vector4 v)
 	out.x = v.X;
 	out.y = v.Y;
 	out.z = v.Z;
+
+	return out;
 }
 
 void vector_append_array(std::vector<Vector4> vec, osuVertex* verts, int num_verts)
@@ -419,6 +447,8 @@ Vector4 toNDC(Vector4 world)
 	result = t * world;
 	result = p * result;
 	result = result / result.W;
+
+	return result;
 }
 
 void draw_tri(void)
@@ -473,8 +503,23 @@ void calc_specular(Vector4 normal, Vector4 &out_color)
 	
 }
 
+void osuSetZ(int x, int y, float val)
+{
+	z_data[y * z_buffer_w + x] = val;
+}
+
+float osuGetZ(int x, int y)
+{
+	return z_data[y * z_buffer_w + x];
+}
+
+void osuEnd(void)
+{
+
+}
+
 //consider the triangle to be in 2D coordinates
-bool z_test(int x, int y, Vector4 t_verts[3], Vector4 &out_color)
+bool z_test(int x, int y, Vector4 t_verts[3])
 {
 	Vector4 pos = Vector4(x, y, 0.0);
 	double area_total = tri_area2D(t_verts[0], t_verts[1], t_verts[2]);
@@ -484,7 +529,9 @@ bool z_test(int x, int y, Vector4 t_verts[3], Vector4 &out_color)
 		t_verts[1].Z * (tri_area2D(pos, t_verts[0], t_verts[2]) / area_total) +
 		t_verts[0].Z * (tri_area2D(pos, t_verts[1], t_verts[2]) / area_total);
 	
-	if (osuGetZ(x, y) > abs(dz))
+	float existing_val = osuGetZ(x, y);
+
+	if (existing_val > abs(dz))
 	{
 		osuSetZ(x, y, abs(dz));
 		return true;
@@ -528,7 +575,7 @@ bool rasterize_pixel(int x, int y, Vector4 &out_color)
 	//construct a bounding box around the triangle and rasterize the pixels contained by the box
 
 	//see if the pixel passes the z-test
-	if (!z_test(x, y))
+	if (!z_test(x, y, t_verts))
 	{
 		return false;
 	}
@@ -551,8 +598,8 @@ bool rasterize_pixel(int x, int y, Vector4 &out_color)
 	{
 	}
 
-
-	out_color = Vector4(1.0, 1.0, 1.0) * 0.3 + diffuse_color * diffuse_color;
+	Vector4 diffuse = diffuse_color * 0.5;
+	out_color = Vector4(1.0, 1.0, 1.0) * 0.3 + diffuse;
 	return true;
 }
 
@@ -582,10 +629,14 @@ void rasterize_tri3D(Vector4 v0, Vector4 v1, Vector4 v2)
 
 void osuVertex3f(double x, double y, double z)
 {
-  if(draw_state.num_verts == 3)
+  if(draw_state.num_verts == 2)
   {
-    //transform the vertex to Window space
-    //rasterize the triangle using the z-buffer test and lighting
+    Vector4 vertex = Vector4(x, y, z);
+	draw_state.vertices[draw_state.num_verts - 1] = vertex;
+	draw_state.num_verts++;
+
+	rasterize_tri3D(draw_state.vertices[0], draw_state.vertices[1], draw_state.vertices[2]);
+
     draw_state.num_verts = 0;
     draw_state.num_normals = 0;
     return;

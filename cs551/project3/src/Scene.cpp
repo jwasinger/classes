@@ -1,5 +1,4 @@
 #include "Scene.h"
-#include <vector>
 
 static std::vector<DLight>  d_lights;
 static std::vector<PLight> p_lights;
@@ -15,7 +14,7 @@ void destroy_scene(void)
 
 }
 
-void begin_scene(Material &m, std::vector<DLight> _d_lights, std::vector<PLight> _p_lights)
+void begin_scene(Material &m, std::vector<PLight> _p_lights, std::vector<DLight> _d_lights)
 {
   d_lights = _d_lights;
   p_lights = _p_lights;
@@ -38,8 +37,12 @@ void draw_model(ObjModel &model)
     n0 = model.NormalArray[model.TriangleArray[i].Normal[0]];
     n1 = model.NormalArray[model.TriangleArray[i].Normal[1]];
     n2 = model.NormalArray[model.TriangleArray[i].Normal[2]];
-    
 	
+
+	osuFaceNormal3f((double)model.TriangleArray[i].faceNormal[0],
+		(double)model.TriangleArray[i].faceNormal[1],
+		(double)model.TriangleArray[i].faceNormal[2]);
+
     osuNormal3f((double)n0.X, (double)n0.Y, (double)n0.Z); 
     osuVertex3f((double)v0.X, (double)v0.Y, (double)v0.Z);
 
@@ -49,10 +52,6 @@ void draw_model(ObjModel &model)
     osuNormal3f((double)n2.X, (double)n2.Y, (double)n2.Z);
     osuVertex3f((double)v2.X, (double)v2.Y, (double)v2.Z);
 	
-	osuFaceNormal3f((double)model.TriangleArray[i].faceNormal[0],
-					(double)model.TriangleArray[i].faceNormal[1],
-					(double)model.TriangleArray[i].faceNormal[2]);
-
     osuEnd();
   }
 }

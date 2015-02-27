@@ -29,7 +29,6 @@ public:
 	static Matrix CreatePerspectiveFOV(double fov, double aspect, double near, double far);
 
 	static Matrix CreateLookAt(Vector4 target, Vector4 eye, Vector4 up);
-	
 };
 
 #endif
