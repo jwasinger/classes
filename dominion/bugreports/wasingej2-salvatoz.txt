@@ -1,0 +1,1 @@
+The function 'council_room_test' is broken.  The function draws 5 cards instead of 4.  The fix can be made by changing 'i < 5' to 'i < 4' on line 650 of dominion.c.

@@ -1,0 +1,3 @@
+s0:buyCard.*=0->s1
+s1:playCard.*=0->error
+s1:endTurn->s0

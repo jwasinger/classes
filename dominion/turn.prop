@@ -1,0 +1,16 @@
+s0:1->error
+s0:2->error
+s0:3->error
+s0:endTurn->s1
+s1:0->error
+s1:2->error
+s1:3->error
+s1:endTurn->s2
+s2:0->error
+s2:1->error
+s2:3->error
+s2:endTurn->s3
+s3:0->error
+s3:1->error
+s3:2->error
+s3:endTurn->s0

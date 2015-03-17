@@ -1,0 +1,1 @@
+The function 'smithy_card' is broken.  There is no condition to allow it to stop drawing cards.  The fix should be to replace 'i+1' with 'i++' on line 792 of dominion.c.

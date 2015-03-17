@@ -1,0 +1,7 @@
+ -- Randomtestadventurer.c --
+
+ The only real problem with uncovered areas was the part in the beginning where the deck will be shuffled if it is empty:
+	obviously, this will only proc 1 in MAX_DECK amounts of times. I added a 1 in 3 chance for the deck to be set to empty
+	so that this will happen more often
+
+I didn't have any real problems with coverage on the smithy card.

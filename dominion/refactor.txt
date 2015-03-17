@@ -1,0 +1,5 @@
+Changes:
+--------
+
+-> error in smithy_card_effect: i starts incrementing from 1 instead of 0
+-> error in mine_card_effect: card that is discarded switched to index choice2 from choice1

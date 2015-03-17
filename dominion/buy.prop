@@ -1,0 +1,7 @@
+s0:buyCard.* = 0->s1
+s0:.*Council Room.*->s2
+s0:.*Festival.*->s2
+s0:.*Baron*->s2
+s1:buyCard.* = 0->error
+s1:endTurn->s0
+s2:endTurn->s0

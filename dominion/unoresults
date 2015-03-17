@@ -1,0 +1,4 @@
+uno: in fct cardEffect, uninitialized variable 'drawntreasure'
+     statement  : dominion.c:670: (drawntreasure<2)
+     declaration: dominion.c:658: int drawntreasure;
+uno:	check completed, try 'uno -h' for different checks

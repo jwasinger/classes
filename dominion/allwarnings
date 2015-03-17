@@ -1,0 +1,13 @@
+In file included from dominion.c:1:
+dominion.h:4:1: warning: C++ style comments are not allowed in ISO C90
+dominion.h:4:1: warning: (this will be reported only once per input file)
+dominion.c:43:3: warning: C++ style comments are not allowed in ISO C90
+dominion.c:43:3: warning: (this will be reported only once per input file)
+dominion.c: In function ‘cardEffect’:
+dominion.c:646: warning: unused parameter ‘bonus’
+dominion.c: In function ‘discardCard’:
+dominion.c:1241: warning: implicit declaration of function ‘fixCardHole’
+dominion.c: In function ‘cardEffect’:
+dominion.c:670: warning: ‘drawntreasure’ is used uninitialized in this function
+rngs.c: In function ‘Random’:
+rngs.c:60: warning: ISO C90 forbids mixed declarations and code
