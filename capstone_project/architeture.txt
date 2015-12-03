@@ -1,0 +1,25 @@
+Definitions: 
+  User-
+  RNC CDN
+  RNC Server
+  Master Server
+  Logical Network Connection
+
+Intro:
+The structure of the RNC CDN can be visualized using a directed graph where
+ nodes represent individual servers, each holding a portion of the CDN's data.  
+ Edges represent a "logical network connection"(definition) between servers through which data can be sent and received. 
+
+User Interaction:
+  Using a normal CDN, data is retrieved via HTTP GET from the user's host to whichever
+  CDN server is the closest.
+  Random Encoding adds a layer of complexity to this model by requiring data to be decoded before it can be read and used.  In addition,
+  due to the random partitioning of data across multiple CDN servers,
+  retrieving one file from the RNC CDN requires data transfer from several servers 
+  and subsequent reassembling of received data. In practice, this means that the process of retrieving data from the user's point of view look like the following:
+
+  1) User makes HTTP GET request to the "Master Server" for a given resource.
+  2) Master server responds with a "File Header" containing information about where different shards of the data are located (IP/Port).
+  3) User establishes simultaneous HTTP/HTTPS connections with all the endpoints and downloads each data shard.
+  4) User decodes and reassembles data.
+
